@@ -661,22 +661,22 @@ document.getElementById('timeoutScreen').addEventListener('click', () => {
 });
 
 function generarCopia(){
-  // Guardar últimos cambios antes de copiar
+  // Guardar últimos cambios en localStorage
   guardarDatos();
 
-  // Obtener los datos actuales de localStorage
+  // Obtener los datos actuales
   const data = localStorage.getItem(LS_KEY) || '{}';
 
-  // Copiar todo el HTML actual
-  let html = document.documentElement.outerHTML;
+  // Copiar el HTML actual SIN afectar el DOM principal
+  let html = document.documentElement.cloneNode(true).outerHTML;
 
-  // ❌ Quitar panel de login de admin
+  // ❌ Eliminar panel de login admin
   html = html.replace(/<div id="adminLogin"[\\s\\S]*?<\\/div>/, '');
 
-  // ❌ Quitar panel de admin
+  // ❌ Eliminar panel de administración
   html = html.replace(/<div id="adminPanel"[\\s\\S]*?<\\/div>/, '');
 
-  // ✅ Inyectar los datos actuales en la copia
+  // ✅ Inyectar datos actuales al localStorage en la copia
   html = html.replace(
     /const LS_KEY = "prestamoData_v1";/,
     `const LS_KEY = "prestamoData_v1";\nlocalStorage.setItem(LS_KEY, '${data}');`
@@ -695,6 +695,7 @@ function generarCopia(){
 
   showToast('Copia HTML generada ✅', 1800);
 }
+
 
   </script>
 
