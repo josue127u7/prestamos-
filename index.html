@@ -254,6 +254,36 @@
   text-align: center;
 }
 
+  /* Botones de compartir */
+  #shareWhatsApp, #shareTelegram {
+    background: linear-gradient(135deg, #25D366, #128C7E); /* Verde WhatsApp */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    margin: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+  #shareTelegram {
+    background: linear-gradient(135deg, #37AEE2, #0088CC); /* Azul Telegram */
+  }
+
+  #shareWhatsApp:hover, #shareTelegram:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+  }
+
+  #shareWhatsApp:active, #shareTelegram:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+
   </style>
 </head>
 <body>
@@ -338,43 +368,8 @@
             <button class="btn btn-secondary" onclick="restartSession()">🔄 Reactivar página</button>
             <button class="btn btn-warning" onclick="logout()">🚪 Cerrar sesión</button>
             <button class="btn btn-primary" onclick="generarCopia()">💾 Generar copia</button>
-            <!-- Botón compartir -->
-<div style="display:flex; justify-content:center; margin-top:16px; position:relative;">
-  <button id="btnShare" class="btn btn-primary">🔗 Compartir</button>
-  <div id="shareMenu" style="display:none; position:absolute; top:50px; background:#fff; border-radius:12px; box-shadow:0 6px 18px rgba(16,24,40,0.1); padding:8px; flex-direction:column; gap:8px; z-index:50;">
-    <button class="btn btn-primary" style="padding:8px 12px; font-size:14px;" onclick="shareWhatsApp()">📱 WhatsApp</button>
-    <button class="btn btn-secondary" style="padding:8px 12px; font-size:14px;" onclick="shareTelegram()">🚀 Telegram</button>
-  </div>
-</div>
-
-<script>
-  const sharedURL = "https://tudominio.github.io/archivo.html"; // <- reemplaza con tu link
-
-  const btnShare = document.getElementById('btnShare');
-  const shareMenu = document.getElementById('shareMenu');
-
-  btnShare.addEventListener('click', () => {
-    shareMenu.style.display = shareMenu.style.display === 'flex' ? 'none' : 'flex';
-  });
-
-  // Ocultar menú si clic fuera
-  document.addEventListener('click', (e) => {
-    if (!btnShare.contains(e.target) && !shareMenu.contains(e.target)) {
-      shareMenu.style.display = 'none';
-    }
-  });
-
-  function shareWhatsApp() {
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent("Mira este pago: " + sharedURL)}`;
-    window.open(url, "_blank");
-  }
-
-  function shareTelegram() {
-    const url = `https://t.me/share/url?url=${encodeURIComponent(sharedURL)}&text=${encodeURIComponent("Mira este pago")}`;
-    window.open(url, "_blank");
-  }
-</script>
-
+            <button id="shareWhatsApp">Enviar por WhatsApp</button>
+            <button id="shareTelegram">Enviar por Telegram</button>
           </div>
         </div>
       </div>
@@ -736,6 +731,22 @@ function generarCopiaLimpia(){
 
   </script>
 
+<script>
+  // Tu enlace público de GitHub Pages
+  const publicLink = "https://josue127u7.github.io/prestamos-/";
+
+  // WhatsApp
+  document.getElementById('shareWhatsApp').onclick = () => {
+    const url = `https://api.whatsapp.com/send?text=¡Mira este pago! ${encodeURIComponent(publicLink)}`;
+    window.open(url, '_blank');
+  };
+
+  // Telegram
+  document.getElementById('shareTelegram').onclick = () => {
+    const url = `https://t.me/share/url?url=${encodeURIComponent(publicLink)}&text=¡Mira este pago!`;
+    window.open(url, '_blank');
+  };
+</script>
+
 </body>
 </html>
-
