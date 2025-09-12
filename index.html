@@ -661,26 +661,28 @@ document.getElementById('timeoutScreen').addEventListener('click', () => {
 });
 
 function generarCopia(){
-  // Guardar últimos cambios
+  // Guardar últimos cambios antes de copiar
   guardarDatos();
 
-  // Obtener los datos actuales
+  // Obtener los datos actuales de localStorage
   const data = localStorage.getItem(LS_KEY) || '{}';
 
-  // Tomar todo el HTML actual
+  // Copiar todo el HTML actual
   let html = document.documentElement.outerHTML;
 
-  // Quitar paneles de admin de la copia
-  html = html.replace(/<div id="adminLogin"[\s\S]*?<\/div>/, '');
-  html = html.replace(/<div id="adminPanel"[\s\S]*?<\/div>/, '');
+  // ❌ Quitar panel de login de admin
+  html = html.replace(/<div id="adminLogin"[\\s\\S]*?<\\/div>/, '');
 
-  // Inyectar los datos actuales como valores fijos iniciales
+  // ❌ Quitar panel de admin
+  html = html.replace(/<div id="adminPanel"[\\s\\S]*?<\\/div>/, '');
+
+  // ✅ Inyectar los datos actuales en la copia
   html = html.replace(
     /const LS_KEY = "prestamoData_v1";/,
     `const LS_KEY = "prestamoData_v1";\nlocalStorage.setItem(LS_KEY, '${data}');`
   );
 
-  // Crear archivo descargable
+  // Generar archivo descargable
   const blob = new Blob([html], {type: "text/html"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -693,7 +695,6 @@ function generarCopia(){
 
   showToast('Copia HTML generada ✅', 1800);
 }
-
 
   </script>
 
