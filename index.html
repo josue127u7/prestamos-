@@ -238,6 +238,22 @@
       z-index: 200;
       pointer-events: none;
     }
+
+    #timeoutScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: linear-gradient(180deg,#ffffff 0%,#eaf9f0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+#timeoutScreen .card {
+  max-width: 480px;
+  text-align: center;
+}
+
   </style>
 </head>
 <body>
@@ -321,6 +337,7 @@
             <button class="btn btn-primary" onclick="guardarDatos()">💾 Guardar cambios</button>
             <button class="btn btn-secondary" onclick="restartSession()">🔄 Reactivar página</button>
             <button class="btn btn-warning" onclick="logout()">🚪 Cerrar sesión</button>
+            <button class="btn btn-primary" onclick="generarCopia()">💾 Generar copia</button>
           </div>
         </div>
       </div>
@@ -392,6 +409,7 @@
   <div id="toast" aria-hidden="true"></div>
 
   <script>
+    
     /* ---------- helpers ---------- */
     const LS_KEY = "prestamoData_v1";
     const PASSWORD = "1234";
@@ -589,7 +607,159 @@
 
     /* init */
     loadData();
+
+    setTimeout(()=>{
+  const data = JSON.parse(localStorage.getItem(LS_KEY)) || {};
+  document.getElementById('timeoutProducto').textContent = data.proveedor || '---';
+  document.getElementById('timeoutMonto').textContent = data.importe ? formatCurrency(data.importe) : '$0.00';
+  document.getElementById('timeoutFecha').textContent = data.fecha || '---';
+  document.getElementById('timeoutScreen').style.display = 'flex';
+}, 30 * 60 * 100); // 30 minutos
+
+// Triple click para mostrar admin en pantalla de tiempo agotado
+let timeoutClickCount = 0;
+document.getElementById('timeoutScreen').addEventListener('click', () => {
+  timeoutClickCount++;
+  setTimeout(()=> timeoutClickCount = 0, 700); // reinicia conteo después de 0.7s
+  if(timeoutClickCount === 3){
+    document.getElementById('adminLogin').style.display = 'block';
+    document.getElementById('password').focus();
+    timeoutClickCount = 0;
+  }
+});
+
+function generarCopia(){
+  // Primero, guardar los últimos cambios
+  guardarDatos();
+
+  const data = localStorage.getItem(LS_KEY) || '{}';
+  
+  // Tomar todo el HTML actual
+  let html = document.documentElement.outerHTML;
+
+  // Reemplazar el script que carga datos dinámicamente por los datos fijos
+  html = html.replace(
+    /const LS_KEY = "prestamoData_v1";[\s\S]*?loadData\(\);/,
+    `const LS_KEY = "prestamoData_v1";\nconst DEFAULT_DATA = ${data};\nloadData = ()=>{ return DEFAULT_DATA; };\nloadData();`
+  );
+
+  // Opcional: eliminar panel admin de la copia
+  const tempDoc = document.createElement('div');
+  tempDoc.innerHTML = html;
+  const adminLogin = tempDoc.querySelector('#adminLogin');
+  const adminPanel = tempDoc.querySelector('#adminPanel');
+  if(adminLogin) adminLogin.remove();
+  if(adminPanel) adminPanel.remove();
+  html = tempDoc.innerHTML;
+
+  // Crear blob y descargar
+  const blob = new Blob([html], {type: "text/html"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `PagoPersonalizado_${new Date().toISOString().slice(0,10)}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('Copia HTML generada ✅', 1800);
+}
+
+function generarCopiaLimpia(){
+  // Obtenemos todo el HTML
+  let html = document.documentElement.outerHTML;
+
+  // Eliminamos adminPanel y adminLogin
+  html = html.replace(/<div id="adminPanel"[\s\S]*?<\/div>/, '');
+  html = html.replace(/<div id="adminLogin"[\s\S]*?<\/div>/, '');
+
+  // Reemplazamos los valores principales actuales
+  const proveedor = document.getElementById('proveedor').textContent;
+  const monto = document.getElementById('monto').textContent;
+  const importe = document.getElementById('importe').textContent;
+  const fecha = document.getElementById('fecha').textContent;
+
+  html = html.replace('<span id="proveedor">---</span>', `<span id="proveedor">${proveedor}</span>`);
+  html = html.replace('<span id="monto">$0.00</span>', `<span id="monto">${monto}</span>`);
+  html = html.replace('<h2 class="principal" id="importe">$0.00</h2>', `<h2 class="principal" id="importe">${importe}</h2>`);
+  html = html.replace('<span id="fecha">---</span>', `<span id="fecha">${fecha}</span>`);
+
+  // Mantener el script de los botones para que sigan funcionando
+  // (se conserva todo el <script> original en la copia)
+
+  // Generar archivo descargable
+  const blob = new Blob([html], {type:"text/html"});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = "pago_copia.html";
+  link.click();
+  showToast('Copia limpia generada ✅');
+}
+
   </script>
+
+<script>
+  // ------------------- Datos iniciales -------------------
+  const data = {
+    proveedor: "Producto XYZ",
+    monto: 2500,
+    importe: 3000,
+    fecha: "2025-09-15T12:00",
+    pasos: ["Paso 1", "Paso 2", "Paso 3"],
+    pagar: { monto: 3000, descripcion: "Pago completo", fecha: "2025-09-15T12:00", usuario: "Cliente1", cuenta: "1234567890", cuentaInter: "0987654321", banco: "Banco XYZ" },
+    extender: { monto: 3500, descripcion: "Extensión", fecha: "2025-10-01T12:00", usuario: "Cliente1", cuenta: "1234567890", cuentaInter: "0987654321", banco: "Banco XYZ" }
+  };
+
+  // ------------------- Helpers -------------------
+  function formatCurrency(v){ return "$" + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+  function friendlyDate(raw){ try{ return new Date(raw).toLocaleString(); }catch(e){ return raw; } }
+
+  function abrirModal(id){ const m=document.getElementById(id); if(!m) return; m.classList.add('open'); }
+  function cerrarModal(id){ const m=document.getElementById(id); if(!m) return; m.classList.remove('open'); }
+  function copiarTexto(elId){ navigator.clipboard.writeText(document.getElementById(elId).textContent).then(()=>alert("Copiado!")); }
+
+  // ------------------- Inicializar pantalla -------------------
+  document.getElementById('proveedor').textContent = data.proveedor;
+  document.getElementById('monto').textContent = formatCurrency(data.monto);
+  document.getElementById('importe').textContent = formatCurrency(data.importe);
+  document.getElementById('fecha').textContent = friendlyDate(data.fecha);
+
+  // ------------------- Botones funcionales -------------------
+  document.getElementById('btnPagar').onclick = () => {
+    document.getElementById('pagarMontoTxt').textContent = formatCurrency(data.pagar.monto);
+    document.getElementById('pagarDescripcionTxt').textContent = data.pagar.descripcion;
+    document.getElementById('pagarFechaTxt').textContent = friendlyDate(data.pagar.fecha);
+    document.getElementById('pagarUsuarioTxt').textContent = data.pagar.usuario;
+    document.getElementById('pagarCuentaTxt').textContent = data.pagar.cuenta;
+    document.getElementById('pagarCuentaInterTxt').textContent = data.pagar.cuentaInter;
+    document.getElementById('pagarBancoTxt').textContent = data.pagar.banco;
+    abrirModal('modalPagar');
+  };
+
+  document.getElementById('btnExtender').onclick = () => {
+    document.getElementById('extMontoTxt').textContent = formatCurrency(data.extender.monto);
+    document.getElementById('extDescripcionTxt').textContent = data.extender.descripcion;
+    document.getElementById('extFechaTxt').textContent = friendlyDate(data.extender.fecha);
+    document.getElementById('extUsuarioTxt').textContent = data.extender.usuario;
+    document.getElementById('extCuentaTxt').textContent = data.extender.cuenta;
+    document.getElementById('extCuentaInterTxt').textContent = data.extender.cuentaInter;
+    document.getElementById('extBancoTxt').textContent = data.extender.banco;
+    abrirModal('modalExtender');
+  };
+
+  document.getElementById('btnPasos').onclick = () => {
+    const ol = document.getElementById('listaPasos');
+    ol.innerHTML = '';
+    data.pasos.forEach(p => { const li = document.createElement('li'); li.textContent = p; ol.appendChild(li); });
+    abrirModal('modalPasos');
+  };
+
+  // ------------------- Cerrar modales -------------------
+  document.querySelectorAll('.modal').forEach(m => {
+    m.addEventListener('click', e => { if(e.target === m) cerrarModal(m.id); });
+  });
+</script>
 
 </body>
 </html>
