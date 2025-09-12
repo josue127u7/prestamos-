@@ -661,30 +661,26 @@ document.getElementById('timeoutScreen').addEventListener('click', () => {
 });
 
 function generarCopia(){
-  // Primero, guardar los últimos cambios
+  // Guardar últimos cambios
   guardarDatos();
 
+  // Obtener los datos actuales
   const data = localStorage.getItem(LS_KEY) || '{}';
-  
+
   // Tomar todo el HTML actual
   let html = document.documentElement.outerHTML;
 
-  // Reemplazar el script que carga datos dinámicamente por los datos fijos
+  // Quitar paneles de admin de la copia
+  html = html.replace(/<div id="adminLogin"[\s\S]*?<\/div>/, '');
+  html = html.replace(/<div id="adminPanel"[\s\S]*?<\/div>/, '');
+
+  // Inyectar los datos actuales como valores fijos iniciales
   html = html.replace(
-    /const LS_KEY = "prestamoData_v1";[\s\S]*?loadData\(\);/,
-    `const LS_KEY = "prestamoData_v1";\nconst DEFAULT_DATA = ${data};\nloadData = ()=>{ return DEFAULT_DATA; };\nloadData();`
+    /const LS_KEY = "prestamoData_v1";/,
+    `const LS_KEY = "prestamoData_v1";\nlocalStorage.setItem(LS_KEY, '${data}');`
   );
 
-  // Opcional: eliminar panel admin de la copia
-  const tempDoc = document.createElement('div');
-  tempDoc.innerHTML = html;
-  const adminLogin = tempDoc.querySelector('#adminLogin');
-  const adminPanel = tempDoc.querySelector('#adminPanel');
-  if(adminLogin) adminLogin.remove();
-  if(adminPanel) adminPanel.remove();
-  html = tempDoc.innerHTML;
-
-  // Crear blob y descargar
+  // Crear archivo descargable
   const blob = new Blob([html], {type: "text/html"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -698,36 +694,6 @@ function generarCopia(){
   showToast('Copia HTML generada ✅', 1800);
 }
 
-function generarCopiaLimpia(){
-  // Obtenemos todo el HTML
-  let html = document.documentElement.outerHTML;
-
-  // Eliminamos adminPanel y adminLogin
-  html = html.replace(/<div id="adminPanel"[\s\S]*?<\/div>/, '');
-  html = html.replace(/<div id="adminLogin"[\s\S]*?<\/div>/, '');
-
-  // Reemplazamos los valores principales actuales
-  const proveedor = document.getElementById('proveedor').textContent;
-  const monto = document.getElementById('monto').textContent;
-  const importe = document.getElementById('importe').textContent;
-  const fecha = document.getElementById('fecha').textContent;
-
-  html = html.replace('<span id="proveedor">---</span>', `<span id="proveedor">${proveedor}</span>`);
-  html = html.replace('<span id="monto">$0.00</span>', `<span id="monto">${monto}</span>`);
-  html = html.replace('<h2 class="principal" id="importe">$0.00</h2>', `<h2 class="principal" id="importe">${importe}</h2>`);
-  html = html.replace('<span id="fecha">---</span>', `<span id="fecha">${fecha}</span>`);
-
-  // Mantener el script de los botones para que sigan funcionando
-  // (se conserva todo el <script> original en la copia)
-
-  // Generar archivo descargable
-  const blob = new Blob([html], {type:"text/html"});
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = "pago_copia.html";
-  link.click();
-  showToast('Copia limpia generada ✅');
-}
 
   </script>
 
