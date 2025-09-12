@@ -338,6 +338,43 @@
             <button class="btn btn-secondary" onclick="restartSession()">🔄 Reactivar página</button>
             <button class="btn btn-warning" onclick="logout()">🚪 Cerrar sesión</button>
             <button class="btn btn-primary" onclick="generarCopia()">💾 Generar copia</button>
+            <!-- Botón compartir -->
+<div style="display:flex; justify-content:center; margin-top:16px; position:relative;">
+  <button id="btnShare" class="btn btn-primary">🔗 Compartir</button>
+  <div id="shareMenu" style="display:none; position:absolute; top:50px; background:#fff; border-radius:12px; box-shadow:0 6px 18px rgba(16,24,40,0.1); padding:8px; flex-direction:column; gap:8px; z-index:50;">
+    <button class="btn btn-primary" style="padding:8px 12px; font-size:14px;" onclick="shareWhatsApp()">📱 WhatsApp</button>
+    <button class="btn btn-secondary" style="padding:8px 12px; font-size:14px;" onclick="shareTelegram()">🚀 Telegram</button>
+  </div>
+</div>
+
+<script>
+  const sharedURL = "https://tudominio.github.io/archivo.html"; // <- reemplaza con tu link
+
+  const btnShare = document.getElementById('btnShare');
+  const shareMenu = document.getElementById('shareMenu');
+
+  btnShare.addEventListener('click', () => {
+    shareMenu.style.display = shareMenu.style.display === 'flex' ? 'none' : 'flex';
+  });
+
+  // Ocultar menú si clic fuera
+  document.addEventListener('click', (e) => {
+    if (!btnShare.contains(e.target) && !shareMenu.contains(e.target)) {
+      shareMenu.style.display = 'none';
+    }
+  });
+
+  function shareWhatsApp() {
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent("Mira este pago: " + sharedURL)}`;
+    window.open(url, "_blank");
+  }
+
+  function shareTelegram() {
+    const url = `https://t.me/share/url?url=${encodeURIComponent(sharedURL)}&text=${encodeURIComponent("Mira este pago")}`;
+    window.open(url, "_blank");
+  }
+</script>
+
           </div>
         </div>
       </div>
@@ -699,67 +736,6 @@ function generarCopiaLimpia(){
 
   </script>
 
-<script>
-  // ------------------- Datos iniciales -------------------
-  const data = {
-    proveedor: "Producto XYZ",
-    monto: 2500,
-    importe: 3000,
-    fecha: "2025-09-15T12:00",
-    pasos: ["Paso 1", "Paso 2", "Paso 3"],
-    pagar: { monto: 3000, descripcion: "Pago completo", fecha: "2025-09-15T12:00", usuario: "Cliente1", cuenta: "1234567890", cuentaInter: "0987654321", banco: "Banco XYZ" },
-    extender: { monto: 3500, descripcion: "Extensión", fecha: "2025-10-01T12:00", usuario: "Cliente1", cuenta: "1234567890", cuentaInter: "0987654321", banco: "Banco XYZ" }
-  };
-
-  // ------------------- Helpers -------------------
-  function formatCurrency(v){ return "$" + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}); }
-  function friendlyDate(raw){ try{ return new Date(raw).toLocaleString(); }catch(e){ return raw; } }
-
-  function abrirModal(id){ const m=document.getElementById(id); if(!m) return; m.classList.add('open'); }
-  function cerrarModal(id){ const m=document.getElementById(id); if(!m) return; m.classList.remove('open'); }
-  function copiarTexto(elId){ navigator.clipboard.writeText(document.getElementById(elId).textContent).then(()=>alert("Copiado!")); }
-
-  // ------------------- Inicializar pantalla -------------------
-  document.getElementById('proveedor').textContent = data.proveedor;
-  document.getElementById('monto').textContent = formatCurrency(data.monto);
-  document.getElementById('importe').textContent = formatCurrency(data.importe);
-  document.getElementById('fecha').textContent = friendlyDate(data.fecha);
-
-  // ------------------- Botones funcionales -------------------
-  document.getElementById('btnPagar').onclick = () => {
-    document.getElementById('pagarMontoTxt').textContent = formatCurrency(data.pagar.monto);
-    document.getElementById('pagarDescripcionTxt').textContent = data.pagar.descripcion;
-    document.getElementById('pagarFechaTxt').textContent = friendlyDate(data.pagar.fecha);
-    document.getElementById('pagarUsuarioTxt').textContent = data.pagar.usuario;
-    document.getElementById('pagarCuentaTxt').textContent = data.pagar.cuenta;
-    document.getElementById('pagarCuentaInterTxt').textContent = data.pagar.cuentaInter;
-    document.getElementById('pagarBancoTxt').textContent = data.pagar.banco;
-    abrirModal('modalPagar');
-  };
-
-  document.getElementById('btnExtender').onclick = () => {
-    document.getElementById('extMontoTxt').textContent = formatCurrency(data.extender.monto);
-    document.getElementById('extDescripcionTxt').textContent = data.extender.descripcion;
-    document.getElementById('extFechaTxt').textContent = friendlyDate(data.extender.fecha);
-    document.getElementById('extUsuarioTxt').textContent = data.extender.usuario;
-    document.getElementById('extCuentaTxt').textContent = data.extender.cuenta;
-    document.getElementById('extCuentaInterTxt').textContent = data.extender.cuentaInter;
-    document.getElementById('extBancoTxt').textContent = data.extender.banco;
-    abrirModal('modalExtender');
-  };
-
-  document.getElementById('btnPasos').onclick = () => {
-    const ol = document.getElementById('listaPasos');
-    ol.innerHTML = '';
-    data.pasos.forEach(p => { const li = document.createElement('li'); li.textContent = p; ol.appendChild(li); });
-    abrirModal('modalPasos');
-  };
-
-  // ------------------- Cerrar modales -------------------
-  document.querySelectorAll('.modal').forEach(m => {
-    m.addEventListener('click', e => { if(e.target === m) cerrarModal(m.id); });
-  });
-</script>
-
 </body>
 </html>
+
