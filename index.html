@@ -363,12 +363,12 @@
         <div class="admin-section">
           <h4 style="margin:0 0 8px">Pasos (cada línea → un paso)</h4>
           <textarea id="pasosInput" placeholder="Paso 1&#10;Paso 2"></textarea>
-          <div style="display:flex;gap:10px;margin-top:8px;">
+          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
             <button class="btn btn-primary" onclick="guardarDatos()">💾 Guardar cambios</button>
             <button class="btn btn-secondary" onclick="restartSession()">🔄 Reactivar página</button>
             <button class="btn btn-warning" onclick="logout()">🚪 Cerrar sesión</button>
-            <button class="btn btn-primary" onclick="generarCopia()">💾 Generar copia</button>
-            <button onclick="enviarWhatsApp()">Enviar por WhatsApp</button>
+            <!-- Botón "Generar copia" eliminado (se mantiene la función en JS) -->
+            <button class="btn" id="adminShareWhats" style="background:#25D366;color:#fff;border-radius:10px;">Enviar por WhatsApp</button>
             <button id="shareTelegram">Enviar por Telegram</button>
           </div>
         </div>
@@ -446,6 +446,9 @@
     const LS_KEY = "prestamoData_v1";
     const PASSWORD = "1234";
 
+    /* Ajusta sólo esta URL si cambias de hosting */
+    const PUBLIC_LINK = "https://prestamos-app.netlify.app/"; // <- usa tu link Netlify aquí
+
     function formatCurrency(v){
       const n = Number(v);
       if (!isFinite(n)) return "$0.00";
@@ -467,13 +470,9 @@
       t.style.opacity = '1';
       t.setAttribute('aria-hidden','false');
       clearTimeout(t._timer);
-      t._timer = setTimeout(()=>{
-        t.style.opacity='0';
-        t.setAttribute('aria-hidden','true');
-      }, ms);
+      t._timer = setTimeout(()=>{ t.style.opacity='0'; t.setAttribute('aria-hidden','true'); }, ms);
     }
 
-    /* ---------- data load/save & UI sync ---------- */
     function getDefaultData(){
       return {
         proveedor: "",
@@ -486,17 +485,18 @@
       };
     }
 
+    /* ---------- carga / sincroniza UI ---------- */
     function loadData(){
       const raw = localStorage.getItem(LS_KEY);
       const data = raw ? JSON.parse(raw) : getDefaultData();
 
-      // display main values
+      // mostrar en la vista principal
       document.getElementById('proveedor').textContent = data.proveedor || '---';
       document.getElementById('monto').textContent = data.monto ? formatCurrency(data.monto) : '$0.00';
       document.getElementById('importe').textContent = data.importe ? formatCurrency(data.importe) : '$0.00';
       document.getElementById('fecha').textContent = data.fecha || '---';
 
-      // fill admin inputs
+      // rellenar inputs admin
       const setVal = (id, val) => { const el = document.getElementById(id); if(!el) return; el.value = val == null ? '' : val; };
       setVal('proveedorInput', data.proveedor || '');
       setVal('montoInput', data.monto || '');
@@ -519,41 +519,50 @@
       setVal('pasosInput', (Array.isArray(data.pasos) ? data.pasos.join("\n") : ''));
 
       // attach click handlers
-      document.getElementById('btnPagar').onclick = () => {
-        const d = JSON.parse(localStorage.getItem(LS_KEY)) || data;
-        document.getElementById('pagarMontoTxt').textContent = d.pagar.monto ? formatCurrency(d.pagar.monto) : '$0.00';
-        document.getElementById('pagarDescripcionTxt').textContent = d.pagar.descripcion || '---';
-        document.getElementById('pagarFechaTxt').textContent = friendlyDate(d.pagar.fecha);
-        document.getElementById('pagarUsuarioTxt').textContent = d.pagar.usuario || '---';
-        document.getElementById('pagarCuentaTxt').textContent = d.pagar.cuenta || '---';
-        document.getElementById('pagarCuentaInterTxt').textContent = d.pagar.cuentaInter || '---';
-        document.getElementById('pagarBancoTxt').textContent = d.pagar.banco || '---';
-        abrirModal('modalPagar');
-      };
+      const pagarBtn = document.getElementById('btnPagar');
+      if(pagarBtn){
+        pagarBtn.onclick = () => {
+          const d = JSON.parse(localStorage.getItem(LS_KEY)) || data;
+          document.getElementById('pagarMontoTxt').textContent = d.pagar.monto ? formatCurrency(d.pagar.monto) : '$0.00';
+          document.getElementById('pagarDescripcionTxt').textContent = d.pagar.descripcion || '---';
+          document.getElementById('pagarFechaTxt').textContent = friendlyDate(d.pagar.fecha);
+          document.getElementById('pagarUsuarioTxt').textContent = d.pagar.usuario || '---';
+          document.getElementById('pagarCuentaTxt').textContent = d.pagar.cuenta || '---';
+          document.getElementById('pagarCuentaInterTxt').textContent = d.pagar.cuentaInter || '---';
+          document.getElementById('pagarBancoTxt').textContent = d.pagar.banco || '---';
+          abrirModal('modalPagar');
+        };
+      }
 
-      document.getElementById('btnExtender').onclick = () => {
-        const d = JSON.parse(localStorage.getItem(LS_KEY)) || data;
-        document.getElementById('extMontoTxt').textContent = d.extender.monto ? formatCurrency(d.extender.monto) : '$0.00';
-        document.getElementById('extDescripcionTxt').textContent = d.extender.descripcion || '---';
-        document.getElementById('extFechaTxt').textContent = friendlyDate(d.extender.fecha);
-        document.getElementById('extUsuarioTxt').textContent = d.extender.usuario || '---';
-        document.getElementById('extCuentaTxt').textContent = d.extender.cuenta || '---';
-        document.getElementById('extCuentaInterTxt').textContent = d.extender.cuentaInter || '---';
-        document.getElementById('extBancoTxt').textContent = d.extender.banco || '---';
-        abrirModal('modalExtender');
-      };
+      const extBtn = document.getElementById('btnExtender');
+      if(extBtn){
+        extBtn.onclick = () => {
+          const d = JSON.parse(localStorage.getItem(LS_KEY)) || data;
+          document.getElementById('extMontoTxt').textContent = d.extender.monto ? formatCurrency(d.extender.monto) : '$0.00';
+          document.getElementById('extDescripcionTxt').textContent = d.extender.descripcion || '---';
+          document.getElementById('extFechaTxt').textContent = friendlyDate(d.extender.fecha);
+          document.getElementById('extUsuarioTxt').textContent = d.extender.usuario || '---';
+          document.getElementById('extCuentaTxt').textContent = d.extender.cuenta || '---';
+          document.getElementById('extCuentaInterTxt').textContent = d.extender.cuentaInter || '---';
+          document.getElementById('extBancoTxt').textContent = d.extender.banco || '---';
+          abrirModal('modalExtender');
+        };
+      }
 
-      document.getElementById('btnPasos').onclick = () => {
-        const d = JSON.parse(localStorage.getItem(LS_KEY)) || data;
-        const ol = document.getElementById('listaPasos');
-        ol.innerHTML = '';
-        (d.pasos || []).forEach(p => {
-          const li = document.createElement('li');
-          li.textContent = p;
-          ol.appendChild(li);
-        });
-        abrirModal('modalPasos');
-      };
+      const pasosBtn = document.getElementById('btnPasos');
+      if(pasosBtn){
+        pasosBtn.onclick = () => {
+          const d = JSON.parse(localStorage.getItem(LS_KEY)) || data;
+          const ol = document.getElementById('listaPasos');
+          ol.innerHTML = '';
+          (d.pasos || []).forEach(p => {
+            const li = document.createElement('li');
+            li.textContent = p;
+            ol.appendChild(li);
+          });
+          abrirModal('modalPasos');
+        };
+      }
     }
 
     function guardarDatos(){
@@ -613,7 +622,7 @@
 
     /* ---------- small UX helpers ---------- */
     let clickCount = 0;
-    document.getElementById('titulo').addEventListener('click', ()=>{
+    document.getElementById('titulo').addEventListener('click', ()=>{ 
       clickCount++;
       setTimeout(()=> clickCount = 0, 700);
       if(clickCount === 3){
@@ -637,229 +646,222 @@
       m.addEventListener('click', (ev)=>{ if(ev.target === m) { m.classList.remove('open'); m.setAttribute('aria-hidden','true'); } });
     });
 
-    /* init */
+    /* ---------- compartir (WHATSAPP / TELEGRAM) ---------- */
+
+    // Construye la URL pública con parámetros
+    function buildShareUrl(data){
+      // usa PUBLIC_LINK si es http(s), si no, usa window.location origin (defensivo)
+      let base = PUBLIC_LINK && /^https?:\/\//.test(PUBLIC_LINK) ? PUBLIC_LINK : (window.location.origin + window.location.pathname);
+      const u = new URL(base);
+      if(data.proveedor) u.searchParams.set('proveedor', data.proveedor);
+      if(data.monto !== undefined) u.searchParams.set('monto', String(data.monto));
+      if(data.importe !== undefined) u.searchParams.set('importe', String(data.importe));
+      if(data.fecha) u.searchParams.set('fecha', data.fecha);
+      // pagar.* params
+      if(data.pagar){
+        if(data.pagar.monto) u.searchParams.set('pagarMonto', String(data.pagar.monto));
+        if(data.pagar.descripcion) u.searchParams.set('pagarDescripcion', data.pagar.descripcion);
+        if(data.pagar.fecha) u.searchParams.set('pagarFecha', data.pagar.fecha);
+        if(data.pagar.usuario) u.searchParams.set('pagarUsuario', data.pagar.usuario);
+        if(data.pagar.cuenta) u.searchParams.set('pagarCuenta', data.pagar.cuenta);
+        if(data.pagar.cuentaInter) u.searchParams.set('pagarCuentaInter', data.pagar.cuentaInter);
+        if(data.pagar.banco) u.searchParams.set('pagarBanco', data.pagar.banco);
+      }
+      // extender.* params
+      if(data.extender){
+        if(data.extender.monto) u.searchParams.set('extMonto', String(data.extender.monto));
+        if(data.extender.descripcion) u.searchParams.set('extDescripcion', data.extender.descripcion);
+        if(data.extender.fecha) u.searchParams.set('extFecha', data.extender.fecha);
+        if(data.extender.usuario) u.searchParams.set('extUsuario', data.extender.usuario);
+        if(data.extender.cuenta) u.searchParams.set('extCuenta', data.extender.cuenta);
+        if(data.extender.cuentaInter) u.searchParams.set('extCuentaInter', data.extender.cuentaInter);
+        if(data.extender.banco) u.searchParams.set('extBanco', data.extender.banco);
+      }
+      // pasos -> unir por salto de línea (encoded automáticamente)
+      if(Array.isArray(data.pasos) && data.pasos.length) u.searchParams.set('pasos', data.pasos.join('\n'));
+      return u.toString();
+    }
+
+    function buildMessage(data, url){
+      const proveedor = data.proveedor || '---';
+      const importe = (data.importe || data.importe === 0) ? formatCurrency(data.importe) : '$0.00';
+      const fecha = data.fecha || '---';
+      return `📌 *Pago pendiente*\n\n🏦 Producto: ${proveedor}\n💵 Importe: ${importe}\n📅 Fecha límite: ${fecha}\n\n👉 Paga aquí: ${url}`;
+    }
+
+    // Handler general para WhatsApp (usa PUBLIC_LINK y datos guardados)
+    function enviarPorWhatsAppWithDataObj(data){
+      const url = buildShareUrl(data);
+      const msg = buildMessage(data, url);
+      // Abrir en nueva ventana (wa.me se recomienda para móviles)
+      window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // Handler general para Telegram
+    function enviarPorTelegramWithDataObj(data){
+      const url = buildShareUrl(data);
+      const msg = buildMessage(data, url);
+      window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // Conectar botones visibles (se hace inmediatamente para asegurar que funcionan)
+    (function attachShareListeners(){
+      const btnWA = document.getElementById('shareWhatsApp'); // (opcional, si lo agregas)
+      const btnTG = document.getElementById('shareTelegram');
+      const adminWA = document.getElementById('adminShareWhats');
+
+      if(btnWA){
+        btnWA.addEventListener('click', ()=>{
+          guardarDatos(); // aseguramos guardar
+          const data = JSON.parse(localStorage.getItem(LS_KEY)) || getDefaultData();
+          enviarPorWhatsAppWithDataObj(data);
+        });
+      }
+
+      if(btnTG){
+        btnTG.addEventListener('click', ()=>{
+          guardarDatos();
+          const data = JSON.parse(localStorage.getItem(LS_KEY)) || getDefaultData();
+          enviarPorTelegramWithDataObj(data);
+        });
+      }
+
+      if(adminWA){
+        adminWA.addEventListener('click', ()=>{
+          guardarDatos();
+          const data = JSON.parse(localStorage.getItem(LS_KEY)) || getDefaultData();
+          enviarPorWhatsAppWithDataObj(data);
+        });
+      }
+    })();
+
+    /* ---------- al cargar la página: leer parámetros y guardarlos ---------- */
+    function parseParamsToLocalStorage(){
+      const params = new URLSearchParams(window.location.search);
+      if(!params.toString()) return; // no params -> nada que hacer
+
+      // empezar con lo que hay en localStorage (si existe)
+      const existing = localStorage.getItem(LS_KEY);
+      const data = existing ? JSON.parse(existing) : getDefaultData();
+
+      // Si vienen como params, sobrescribimos sólo los presentes
+      if(params.has('proveedor')) data.proveedor = params.get('proveedor');
+      if(params.has('monto')) {
+        const raw = params.get('monto');
+        data.monto = isNaN(Number(raw)) ? raw : Number(raw);
+      }
+      if(params.has('importe')) {
+        const raw = params.get('importe');
+        // puede venir "$50" o "50"
+        data.importe = Number(String(raw).replace(/[^0-9\.\-]/g, '')) || 0;
+      }
+      if(params.has('fecha')) data.fecha = params.get('fecha');
+
+      // pagar.* params
+      if(params.has('pagarMonto')) data.pagar.monto = params.get('pagarMonto');
+      if(params.has('pagarDescripcion')) data.pagar.descripcion = params.get('pagarDescripcion');
+      if(params.has('pagarFecha')) data.pagar.fecha = params.get('pagarFecha');
+      if(params.has('pagarUsuario')) data.pagar.usuario = params.get('pagarUsuario');
+      if(params.has('pagarCuenta')) data.pagar.cuenta = params.get('pagarCuenta');
+      if(params.has('pagarCuentaInter')) data.pagar.cuentaInter = params.get('pagarCuentaInter');
+      if(params.has('pagarBanco')) data.pagar.banco = params.get('pagarBanco');
+
+      // extender.* params
+      if(params.has('extMonto')) data.extender.monto = params.get('extMonto');
+      if(params.has('extDescripcion')) data.extender.descripcion = params.get('extDescripcion');
+      if(params.has('extFecha')) data.extender.fecha = params.get('extFecha');
+      if(params.has('extUsuario')) data.extender.usuario = params.get('extUsuario');
+      if(params.has('extCuenta')) data.extender.cuenta = params.get('extCuenta');
+      if(params.has('extCuentaInter')) data.extender.cuentaInter = params.get('extCuentaInter');
+      if(params.has('extBanco')) data.extender.banco = params.get('extBanco');
+
+      // pasos (si vienen con saltos de línea)
+      if(params.has('pasos')) {
+        const p = params.get('pasos') || '';
+        // si vienen separados por %0A se decodificará correctamente
+        data.pasos = p.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+      }
+
+      // Guardar y actualizar UI
+      localStorage.setItem(LS_KEY, JSON.stringify(data));
+      loadData();
+    }
+
+    /* ---------- funciones de generación de copia (se mantienen) ---------- */
+    function generarCopia(){
+      guardarDatos();
+      const data = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+      let html = document.documentElement.outerHTML;
+
+      // Sustituir valores principales
+      html = html.replace(/<span id="proveedor">.*?<\/span>/, `<span id="proveedor">${(data.proveedor||'---')}</span>`);
+      html = html.replace(/<span id="monto">.*?<\/span>/, `<span id="monto">${(data.monto?formatCurrency(data.monto):'$0.00')}</span>`);
+      html = html.replace(/<h2 class="principal" id="importe">.*?<\/h2>/, `<h2 class="principal" id="importe">${(data.importe?formatCurrency(data.importe):'$0.00')}</h2>`);
+      html = html.replace(/<span id="fecha">.*?<\/span>/, `<span id="fecha">${(data.fecha||'---')}</span>`);
+
+      // Reemplazar datos de modales
+      html = html.replace(/<div class="cuenta-text" id="pagarCuentaTxt">.*?<\/div>/, `<div class="cuenta-text" id="pagarCuentaTxt">${(data.pagar?.cuenta||'---')}</div>`);
+      html = html.replace(/<div class="cuenta-text" id="pagarCuentaInterTxt">.*?<\/div>/, `<div class="cuenta-text" id="pagarCuentaInterTxt">${(data.pagar?.cuentaInter||'---')}</div>`);
+      html = html.replace(/<span id="pagarBancoTxt">.*?<\/span>/, `<span id="pagarBancoTxt">${(data.pagar?.banco||'---')}</span>`);
+
+      html = html.replace(/<div class="cuenta-text" id="extCuentaTxt">.*?<\/div>/, `<div class="cuenta-text" id="extCuentaTxt">${(data.extender?.cuenta||'---')}</div>`);
+      html = html.replace(/<div class="cuenta-text" id="extCuentaInterTxt">.*?<\/div>/, `<div class="cuenta-text" id="extCuentaInterTxt">${(data.extender?.cuentaInter||'---')}</div>`);
+      html = html.replace(/<span id="extBancoTxt">.*?<\/span>/, `<span id="extBancoTxt">${(data.extender?.banco||'---')}</span>`);
+
+      // eliminar panel admin en la copia
+      html = html.replace(/<div id="adminPanel"[\s\S]*?<\/div>/, '');
+      html = html.replace(/<div id="adminLogin"[\s\S]*?<\/div>/, '');
+
+      // descargar
+      const blob = new Blob([html], {type: "text/html"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Pago_${new Date().toISOString().slice(0,10)}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast('Copia con datos ✅', 1800);
+    }
+
+    function generarCopiaLimpia(){
+      let html = document.documentElement.outerHTML;
+      html = html.replace(/<div id="adminPanel"[\s\S]*?<\/div>/, '');
+      html = html.replace(/<div id="adminLogin"[\s\S]*?<\/div>/, '');
+      const proveedor = document.getElementById('proveedor').textContent;
+      const monto = document.getElementById('monto').textContent;
+      const importe = document.getElementById('importe').textContent;
+      const fecha = document.getElementById('fecha').textContent;
+      html = html.replace('<span id="proveedor">---</span>', `<span id="proveedor">${proveedor}</span>`);
+      html = html.replace('<span id="monto">$0.00</span>', `<span id="monto">${monto}</span>`);
+      html = html.replace('<h2 class="principal" id="importe">$0.00</h2>', `<h2 class="principal" id="importe">${importe}</h2>`);
+      html = html.replace('<span id="fecha">---</span>', `<span id="fecha">${fecha}</span>`);
+      const blob = new Blob([html], {type:"text/html"});
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = "pago_copia.html";
+      link.click();
+      showToast('Copia limpia generada ✅');
+    }
+
+    /* ---------- init ---------- */
+    // Primero leer parámetros (si vienen) y guardarlos -> loadData
+    parseParamsToLocalStorage();
+    // Luego cargar UI desde localStorage
     loadData();
 
-    setTimeout(()=>{
-  const data = JSON.parse(localStorage.getItem(LS_KEY)) || {};
-  document.getElementById('timeoutProducto').textContent = data.proveedor || '---';
-  document.getElementById('timeoutMonto').textContent = data.importe ? formatCurrency(data.importe) : '$0.00';
-  document.getElementById('timeoutFecha').textContent = data.fecha || '---';
-  document.getElementById('timeoutScreen').style.display = 'flex';
-}, 30 * 60 * 100); // 30 minutos
-
-// Triple click para mostrar admin en pantalla de tiempo agotado
-let timeoutClickCount = 0;
-document.getElementById('timeoutScreen').addEventListener('click', () => {
-  timeoutClickCount++;
-  setTimeout(()=> timeoutClickCount = 0, 700); // reinicia conteo después de 0.7s
-  if(timeoutClickCount === 3){
-    document.getElementById('adminLogin').style.display = 'block';
-    document.getElementById('password').focus();
-    timeoutClickCount = 0;
-  }
-});
-
-function generarCopia(){
-  // Guardar lo último
-  guardarDatos();
-
-  const data = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-
-  // Clonar todo el documento actual
-  let html = document.documentElement.outerHTML;
-
-  // Sustituir valores principales
-  html = html.replace(/<span id="proveedor">.*?<\/span>/, `<span id="proveedor">${data.proveedor || '---'}</span>`);
-  html = html.replace(/<span id="monto">.*?<\/span>/, `<span id="monto">${formatCurrency(data.monto) || '$0.00'}</span>`);
-  html = html.replace(/<h2 class="principal" id="importe">.*?<\/h2>/, `<h2 class="principal" id="importe">${formatCurrency(data.importe) || '$0.00'}</h2>`);
-  html = html.replace(/<span id="fecha">.*?<\/span>/, `<span id="fecha">${data.fecha || '---'}</span>`);
-
-  // Reemplazar también datos de modales
-  html = html.replace(/<div class="cuenta-text" id="pagarCuentaTxt">.*?<\/div>/, `<div class="cuenta-text" id="pagarCuentaTxt">${data.pagar.cuenta || '---'}</div>`);
-  html = html.replace(/<div class="cuenta-text" id="pagarCuentaInterTxt">.*?<\/div>/, `<div class="cuenta-text" id="pagarCuentaInterTxt">${data.pagar.cuentaInter || '---'}</div>`);
-  html = html.replace(/<span id="pagarBancoTxt">.*?<\/span>/, `<span id="pagarBancoTxt">${data.pagar.banco || '---'}</span>`);
-
-  html = html.replace(/<div class="cuenta-text" id="extCuentaTxt">.*?<\/div>/, `<div class="cuenta-text" id="extCuentaTxt">${data.extender.cuenta || '---'}</div>`);
-  html = html.replace(/<div class="cuenta-text" id="extCuentaInterTxt">.*?<\/div>/, `<div class="cuenta-text" id="extCuentaInterTxt">${data.extender.cuentaInter || '---'}</div>`);
-  html = html.replace(/<span id="extBancoTxt">.*?<\/span>/, `<span id="extBancoTxt">${data.extender.banco || '---'}</span>`);
-
-  // Eliminar panel admin de la copia
-  html = html.replace(/<div id="adminPanel"[\s\S]*?<\/div>/, '');
-  html = html.replace(/<div id="adminLogin"[\s\S]*?<\/div>/, '');
-
-  // Descargar archivo
-  const blob = new Blob([html], {type: "text/html"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `Pago_${new Date().toISOString().slice(0,10)}.html`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  showToast('Copia con datos ✅', 1800);
-}
-
-
-  // Opcional: eliminar panel admin de la copia
-  const tempDoc = document.createElement('div');
-  tempDoc.innerHTML = html;
-  const adminLogin = tempDoc.querySelector('#adminLogin');
-  const adminPanel = tempDoc.querySelector('#adminPanel');
-  if(adminLogin) adminLogin.remove();
-  if(adminPanel) adminPanel.remove();
-  html = tempDoc.innerHTML;
-
-  // Crear blob y descargar
-  const blob = new Blob([html], {type: "text/html"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `PagoPersonalizado_${new Date().toISOString().slice(0,10)}.html`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-
-  showToast('Copia HTML generada ✅', 1800);
-
-
-function generarCopiaLimpia(){
-  // Obtenemos todo el HTML
-  let html = document.documentElement.outerHTML;
-
-  // Eliminamos adminPanel y adminLogin
-  html = html.replace(/<div id="adminPanel"[\s\S]*?<\/div>/, '');
-  html = html.replace(/<div id="adminLogin"[\s\S]*?<\/div>/, '');
-
-  // Reemplazamos los valores principales actuales
-  const proveedor = document.getElementById('proveedor').textContent;
-  const monto = document.getElementById('monto').textContent;
-  const importe = document.getElementById('importe').textContent;
-  const fecha = document.getElementById('fecha').textContent;
-
-  html = html.replace('<span id="proveedor">---</span>', `<span id="proveedor">${proveedor}</span>`);
-  html = html.replace('<span id="monto">$0.00</span>', `<span id="monto">${monto}</span>`);
-  html = html.replace('<h2 class="principal" id="importe">$0.00</h2>', `<h2 class="principal" id="importe">${importe}</h2>`);
-  html = html.replace('<span id="fecha">---</span>', `<span id="fecha">${fecha}</span>`);
-
-  // Mantener el script de los botones para que sigan funcionando
-  // (se conserva todo el <script> original en la copia)
-
-  // Generar archivo descargable
-  const blob = new Blob([html], {type:"text/html"});
-  const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
-  link.download = "pago_copia.html";
-  link.click();
-  showToast('Copia limpia generada ✅');
-}
-
+    // timeoutScreen code left intact (si lo usas en el futuro)
+    try{
+      setTimeout(()=>{
+        const data = JSON.parse(localStorage.getItem(LS_KEY)) || {};
+        if(document.getElementById('timeoutProducto')) document.getElementById('timeoutProducto').textContent = data.proveedor || '---';
+        if(document.getElementById('timeoutMonto')) document.getElementById('timeoutMonto').textContent = data.importe ? formatCurrency(data.importe) : '$0.00';
+        if(document.getElementById('timeoutFecha')) document.getElementById('timeoutFecha').textContent = data.fecha || '---';
+        if(document.getElementById('timeoutScreen')) document.getElementById('timeoutScreen').style.display = 'flex';
+      }, 30 * 60 * 100); // 30 minutos (se mantiene)
+    }catch(e){/* no crítico */}
   </script>
 
-<script>
-  function enviarWhatsApp() {
-    // Obtener los datos que ya tienes en los inputs
-    const proveedor = document.getElementById("proveedor")?.value || "Proveedor";
-    const importe = document.getElementById("importe")?.value || "0";
-    const fecha = document.getElementById("fecha")?.value || "";
-  
-    // Construir URL con parámetros
-    const baseUrl = "https://prestamos-app.netlify.app/";
-    const url = `${baseUrl}?proveedor=${encodeURIComponent(proveedor)}&importe=${encodeURIComponent(importe)}&fecha=${encodeURIComponent(fecha)}`;
-  
-    // Crear el mensaje de WhatsApp
-    const mensaje = `Hola, aquí está tu link personalizado: ${url}`;
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-  
-    // Abrir WhatsApp
-    window.open(whatsappUrl, "_blank");
-  }
-  
-  // --- Al cargar la página, leer parámetros si existen ---
-  window.onload = function () {
-    const params = new URLSearchParams(window.location.search);
-  
-    if (params.has("proveedor")) {
-      const data = {
-        proveedor: params.get("proveedor"),
-        importe: params.get("importe"),
-        fecha: params.get("fecha")
-      };
-  
-      // Guardar también en localStorage por si recarga
-      localStorage.setItem("prestamoData_v1", JSON.stringify(data));
-  
-      // Mostrar en pantalla los valores
-      if (document.getElementById("proveedor")) document.getElementById("proveedor").value = data.proveedor;
-      if (document.getElementById("importe")) document.getElementById("importe").value = data.importe;
-      if (document.getElementById("fecha")) document.getElementById("fecha").value = data.fecha;
-    }
-  };
-  </script>
-  
-
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const publicLink = "https://josue127u7.github.io/prestamos-/";
-  
-    function buildMessage(){
-      const data = JSON.parse(localStorage.getItem("prestamoData_v1")) || {};
-      const proveedor = data.proveedor || "---";
-      const importe = data.importe ? "$" + Number(data.importe).toLocaleString('en-US', {minimumFractionDigits:2}) : "$0.00";
-      const fecha = data.fecha || "---";
-      return `📌 *Pago pendiente*\n\n` +
-             `🏦 Producto: ${proveedor}\n` +
-             `💵 Importe: ${importe}\n` +
-             `📅 Fecha límite: ${fecha}\n\n` +
-             `👉 Paga aquí: ${publicLink}`;
-    }
-  
-    // WhatsApp
-    const btnWhatsApp = document.getElementById('shareWhatsApp');
-    if (btnWhatsApp) {
-      btnWhatsApp.addEventListener('click', () => {
-        guardarDatos(); // 👈 asegura que todo se guarde
-        const text = encodeURIComponent(buildMessage());
-        const url = `https://api.whatsapp.com/send?text=${text}`;
-        window.open(url, '_blank');
-      });
-    }
-  
-    // Telegram
-    const btnTelegram = document.getElementById('shareTelegram');
-    if (btnTelegram) {
-      btnTelegram.addEventListener('click', () => {
-        guardarDatos(); // 👈 asegura que todo se guarde
-        const text = encodeURIComponent(buildMessage());
-        const url = `https://t.me/share/url?url=${encodeURIComponent(publicLink)}&text=${text}`;
-        window.open(url, '_blank');
-      });
-    }
-  });
-  </script>
-  
-  <script>
-    function enviarWhatsApp() {
-      // Leer los datos que ya se muestran en pantalla (no con .value sino con .textContent)
-      const proveedor = document.getElementById("proveedor")?.textContent || "Proveedor";
-      const importe = document.getElementById("importe")?.textContent || "$0.00";
-      const fecha = document.getElementById("fecha")?.textContent || "---";
-    
-      // Construir URL con parámetros
-      const baseUrl = "https://prestamos-app.netlify.app/";
-      const url = `${baseUrl}?proveedor=${encodeURIComponent(proveedor)}&importe=${encodeURIComponent(importe)}&fecha=${encodeURIComponent(fecha)}`;
-    
-      // Crear el mensaje de WhatsApp
-      const mensaje = `Hola, aquí está tu link personalizado: ${url}`;
-      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-    
-      // Abrir WhatsApp
-      window.open(whatsappUrl, "_blank");
-    }
-  </script>
-  
 </body>
 </html>
