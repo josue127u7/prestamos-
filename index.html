@@ -7,67 +7,331 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root{
-      --bg1:#ffffff; --bg2:#eaf9f0; --accent:#28a745; --accent-dark:#1f7a34;
-      --muted:#6b7280; --card-shadow:0 10px 28px rgba(17,24,39,0.12);
+      --bg1: #ffffff;
+      --bg2: #eaf9f0; /* suave verde claro */
+      --accent: #28a745; /* verde principal */
+      --accent-dark: #1f7a34;
+      --muted: #6b7280;
+      --card-shadow: 0 10px 28px rgba(17,24,39,0.12);
     }
-    html,body{height:100%;margin:0;font-family:"Poppins",sans-serif;background:linear-gradient(180deg,var(--bg1) 0%,var(--bg2)100%);overflow:hidden}
-    .page{position:relative;z-index:5;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px;box-sizing:border-box}
-    .card{width:94%;max-width:620px;max-height:85vh;overflow-y:auto;background:#fff;border-radius:18px;box-shadow:var(--card-shadow);padding:28px;text-align:center;position:relative;z-index:10;transition:transform .28s ease}
-    h1{margin:0 0 10px;font-size:22px;color:#15303a;cursor:pointer;font-weight:600}
-    .alerta{display:inline-block;padding:8px 12px;border-radius:10px;background:var(--accent);color:#fff;margin:10px 0 16px;font-weight:600;font-size:13px}
-    h2.principal{margin:12px 0;font-size:38px;color:var(--accent-dark);font-weight:700}
-    .info-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
-    .info-item{text-align:left;min-width:150px}
-    .info-item strong{display:block;color:#15303a;font-weight:600}
-    .info-item span{color:var(--muted)}
-    .btn{display:block;width:100%;padding:12px 14px;margin:8px 0;border-radius:12px;border:0;font-weight:700;color:#fff;cursor:pointer;box-shadow:0 6px 18px rgba(16,24,40,0.06);transition:transform .12s ease,opacity .12s}
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:"Poppins",sans-serif;
+      background:linear-gradient(180deg,var(--bg1) 0%, var(--bg2) 100%);
+      overflow:hidden;
+    }
+    /* Waves container */
+    .waves {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 220px;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .wave-svg {
+      position: absolute;
+      left: -50%;
+      width: 200%;
+      height: 100%;
+      bottom: 0;
+      transform-origin: center bottom;
+    }
+    .wave1 { animation: waveMove 22s linear infinite; opacity:0.95; }
+    .wave2 { animation: waveMove 34s linear infinite reverse; opacity:0.75; filter: blur(0.6px); }
+    .wave3 { animation: waveMove 50s linear infinite; opacity:0.55; filter: blur(1.2px); }
+    @keyframes waveMove {
+      0% { transform: translateX(0) translateY(0); }
+      25% { transform: translateX(-12%) translateY(-8px); }
+      50% { transform: translateX(-25%) translateY(0); }
+      75% { transform: translateX(-37%) translateY(6px); }
+      100% { transform: translateX(-50%) translateY(0); }
+    }
+    /* Card (foreground) */
+    .page {
+      position: relative;
+      z-index: 5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+      box-sizing: border-box;
+    }
+    .card {
+      width: 94%;
+      max-width: 620px;
+      max-height: 85vh;
+      overflow-y: auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: var(--card-shadow);
+      padding: 28px;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+      transition: transform .28s ease;
+    }
+    .card:focus{outline:none}
+    h1 {
+      margin:0 0 10px;
+      font-size:22px;
+      color:#15303a;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .alerta {
+      display:inline-block;
+      padding:8px 12px;
+      border-radius:10px;
+      background:var(--accent);
+      color:#fff;
+      margin:10px 0 16px;
+      font-weight:600;
+      font-size:13px;
+    }
+    h2.principal {
+      margin:12px 0;
+      font-size:38px;
+      color:var(--accent-dark);
+      font-weight:700;
+    }
+    .info-row {
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+    .info-item {
+      text-align:left;
+      min-width:150px;
+    }
+    .info-item strong {
+      display:block;
+      color:#15303a;
+      font-weight:600;
+    }
+    .info-item span {
+      color:var(--muted);
+    }
+    .btn {
+      display:block;
+      width:100%;
+      padding:12px 14px;
+      margin:8px 0;
+      border-radius:12px;
+      border:0;
+      font-weight:700;
+      color:#fff;
+      cursor:pointer;
+      box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+      transition: transform .12s ease, opacity .12s;
+    }
     .btn:active{transform:translateY(1px)}
     .btn-primary{background:var(--accent-dark)}
     .btn-secondary{background:#1861b2}
     .btn-warning{background:#ff9f1c;color:#111}
-    #adminLogin,#adminPanel{text-align:left;margin-top:14px}
-    input,textarea,select{width:100%;padding:10px 12px;margin:6px 0;border-radius:9px;border:1px solid #dbe6db;font-size:14px;box-sizing:border-box}
-    textarea{min-height:80px;resize:vertical}
-    .admin-section{margin:10px 0 18px;padding:10px;border-radius:10px;background:#fbfdfb;border:1px solid #eef8ee}
-    .cuenta-box{display:flex;align-items:center;justify-content:space-between;background:#f7fff7;border:1px solid #e2f3e4;padding:10px;border-radius:10px;margin:8px 0}
-    .cuenta-text{font-weight:600;color:#173d27;word-break:break-all}
-    .copy-btn{background:var(--accent-dark);color:#fff;border:0;padding:8px 10px;border-radius:8px;cursor:pointer}
-    #toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;background:#0f1724;color:#fff;padding:10px 14px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
-    .logo-superior{position:fixed;top:12px;left:16px;width:140px;height:auto;z-index:200;pointer-events:none}
-    /* share buttons style */
-    #shareWhatsApp,#shareTelegram{display:inline-block;padding:10px 16px;border-radius:10px;border:0;color:#fff;font-weight:700;cursor:pointer;margin:6px}
-    #shareWhatsApp{background:linear-gradient(135deg,#25D366,#128C7E)}
-    #shareTelegram{background:linear-gradient(135deg,#37AEE2,#0088CC)}
+    /* admin area */
+    #adminLogin, #adminPanel { text-align:left; margin-top:14px; }
+    input, textarea, select{
+      width:100%;
+      padding:10px 12px;
+      margin:6px 0;
+      border-radius:9px;
+      border:1px solid #dbe6db;
+      font-size:14px;
+      box-sizing:border-box;
+    }
+    textarea{ min-height:80px; resize:vertical; }
+    .admin-section {
+      margin:10px 0 18px;
+      padding:10px;
+      border-radius:10px;
+      background:#fbfdfb;
+      border:1px solid #eef8ee
+    }
+    /* Modals */
+    .modal {
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(8,15,18,0.42);
+      z-index:40;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+    .modal.open {
+      display:flex;
+    }
+    .modal-card {
+      width:100%;
+      max-width:480px;
+      background:#fff;
+      border-radius:14px;
+      padding:20px;
+      box-shadow:0 18px 40px rgba(2,6,23,0.18);
+      position:relative;
+    }
+    .modal-card h3{ margin:0 0 8px; font-size:18px; color:var(--accent-dark)}
+    .modal-close {
+      position:absolute;
+      top:10px;
+      right:12px;
+      font-size:20px;
+      color:#666;
+      cursor:pointer;
+      border:none;
+      background:transparent;
+    }
+    .info-label{font-weight:700;color:#15303a;margin-right:6px}
+    .cuenta-box{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:#f7fff7;
+      border:1px solid #e2f3e4;
+      padding:10px;
+      border-radius:10px;
+      margin:8px 0
+    }
+    .cuenta-text{font-weight:600;color:#173d27; word-break:break-all}
+    .copy-btn{
+      background:var(--accent-dark);
+      color:#fff;
+      border:0;
+      padding:8px 10px;
+      border-radius:8px;
+      cursor:pointer
+    }
+    /* toast */
+    #toast {
+      position:fixed;
+      left:50%;
+      transform:translateX(-50%);
+      bottom:24px;
+      background:#0f1724;
+      color:#fff;
+      padding:10px 14px;
+      border-radius:10px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s;
+      z-index:60
+    }
+    @media (max-width:520px){
+      .info-item{min-width:150px}
+      h2.principal{font-size:32px}
+    }
+
+    /* Logo superior agregado (solo posiciona la imagen) */
+    .logo-superior {
+      position: fixed;
+      top: 12px;
+      left: 16px;
+      width: 140px;
+      height: auto;
+      z-index: 200;
+      pointer-events: none;
+    }
+
+    #timeoutScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: linear-gradient(180deg,#ffffff 0%,#eaf9f0 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+#timeoutScreen .card {
+  max-width: 480px;
+  text-align: center;
+}
+
+  /* Botones de compartir */
+  #shareWhatsApp, #shareTelegram {
+    background: linear-gradient(135deg, #25D366, #128C7E); /* Verde WhatsApp */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    margin: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+  #shareTelegram {
+    background: linear-gradient(135deg, #37AEE2, #0088CC); /* Azul Telegram */
+  }
+
+  #shareWhatsApp:hover, #shareTelegram:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+  }
+
+  #shareWhatsApp:active, #shareTelegram:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  }
+
+
   </style>
 </head>
 <body>
-  <img src="https://josue127u7.github.io/imagen-pay/cropped-payment.png" alt="Payment Latam Logo" class="logo-superior">
+
+   <!-- Imagen decorativa en la esquina superior izquierda -->
+   <img src="https://josue127u7.github.io/imagen-pay/cropped-payment.png" 
+   alt="Payment Latam Logo" 
+   class="logo-superior">
+
+  <!-- Waves (SVG layered) -->
+  <div class="waves" aria-hidden="true">
+    <svg class="wave-svg wave1" viewBox="0 0 1440 320" preserveAspectRatio="none">
+      <path fill="#EAF9F0" d="M0,96L48,106.7C96,117,192,139,288,170.7C384,203,480,245,576,250.7C672,256,768,224,864,192C960,160,1056,128,1152,117.3C1248,107,1344,117,1392,122.7L1440,128L1440,320L0,320Z"></path>
+    </svg>
+    <svg class="wave-svg wave2" viewBox="0 0 1440 320" preserveAspectRatio="none">
+      <path fill="#D6F4E1" d="M0,160L48,160C96,160,192,160,288,149.3C384,139,480,117,576,106.7C672,96,768,96,864,117.3C960,139,1056,181,1152,186.7C1248,192,1344,160,1392,144L1440,128L1440,320L0,320Z"></path>
+    </svg>
+    <svg class="wave-svg wave3" viewBox="0 0 1440 320" preserveAspectRatio="none">
+      <path fill="#C9EDD3" d="M0,224L48,218.7C96,213,192,203,288,197.3C384,192,480,192,576,186.7C672,181,768,171,864,165.3C960,160,1056,160,1152,154.7C1248,149,1344,139,1392,133.3L1440,128L1440,320L0,320Z"></path>
+    </svg>
+  </div>
 
   <div class="page">
     <div class="card" role="main" aria-labelledby="titulo">
       <h1 id="titulo" tabindex="0">Importe de Pago</h1>
       <div class="alerta">⚠️ Paga solo mediante el link oficial</div>
-
       <h2 class="principal" id="importe">$0.00</h2>
-
       <div class="info-row" aria-hidden="false">
         <div class="info-item"><strong>Producto</strong><span id="proveedor">---</span></div>
         <div class="info-item"><strong>Monto préstamo</strong><span id="monto">$0.00</span></div>
         <div class="info-item"><strong>Fecha de pago</strong><span id="fecha">---</span></div>
       </div>
-
       <button id="btnPagar" class="btn btn-primary">Pagar todo</button>
       <button id="btnExtender" class="btn btn-secondary">Extender pago</button>
       <button id="btnPasos" class="btn btn-warning">Pasos a seguir</button>
 
-      <div id="adminLogin" aria-hidden="true" style="display:none;margin-top:12px;">
-        <input id="password" type="password" placeholder="Contraseña admin" aria-label="Contraseña admin">
-        <button id="btnEntrar" class="btn btn-secondary" style="margin-top:8px;">Entrar</button>
+      <!-- admin login (hidden until triggered) -->
+      <div id="adminLogin" aria-hidden="true" style="display:none;">
+        <div style="margin-top:12px;">
+          <input id="password" type="password" placeholder="Contraseña admin" aria-label="Contraseña admin">
+          <button id="btnEntrar" class="btn btn-secondary" style="margin-top:8px;">Entrar</button>
+        </div>
       </div>
 
+      <!-- admin panel -->
       <div id="adminPanel" style="display:none;">
         <div class="admin-section">
-          <h4>Editar datos generales</h4>
+          <h4 style="margin:0 0 8px">Editar datos generales</h4>
           <input id="proveedorInput" placeholder="Proveedor">
           <input id="montoInput" type="number" step="0.01" placeholder="Monto préstamo">
           <input id="importeInput" type="number" step="0.01" placeholder="Importe de pago">
@@ -75,7 +339,7 @@
         </div>
 
         <div class="admin-section">
-          <h4>Datos — Pagar todo</h4>
+          <h4 style="margin:0 0 8px">Datos — Pagar todo</h4>
           <input id="pagarMonto" type="number" step="0.01" placeholder="Monto">
           <input id="pagarDescripcion" placeholder="Descripción">
           <input id="pagarFecha" type="datetime-local">
@@ -86,7 +350,7 @@
         </div>
 
         <div class="admin-section">
-          <h4>Datos — Extender pago</h4>
+          <h4 style="margin:0 0 8px">Datos — Extender pago</h4>
           <input id="extMonto" type="number" step="0.01" placeholder="Monto">
           <input id="extDescripcion" placeholder="Descripción">
           <input id="extFecha" type="datetime-local">
@@ -97,280 +361,505 @@
         </div>
 
         <div class="admin-section">
-          <h4>Pasos (cada línea → un paso)</h4>
+          <h4 style="margin:0 0 8px">Pasos (cada línea → un paso)</h4>
           <textarea id="pasosInput" placeholder="Paso 1&#10;Paso 2"></textarea>
-          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap;">
+          <div style="display:flex;gap:10px;margin-top:8px;">
             <button class="btn btn-primary" onclick="guardarDatos()">💾 Guardar cambios</button>
             <button class="btn btn-secondary" onclick="restartSession()">🔄 Reactivar página</button>
             <button class="btn btn-warning" onclick="logout()">🚪 Cerrar sesión</button>
-
-            <!-- BOTONES DE COMPARTIR (solo estos) -->
-            <button id="shareWhatsApp">Enviar por WhatsApp</button>
+            <button class="btn btn-primary" onclick="generarCopia()">💾 Generar copia</button>
+            <button onclick="enviarWhatsApp()">Enviar por WhatsApp</button>
             <button id="shareTelegram">Enviar por Telegram</button>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- Modales (sin cambios importantes) -->
-  <div id="modalPagar" class="modal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;">
-    <div class="modal-card">
-      <button class="modal-close" aria-label="Cerrar">✕</button>
+  <!-- Modals -->
+  <div id="modalPagar" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-card" role="document">
+      <button class="modal-close" aria-label="Cerrar" onclick="cerrarModal('modalPagar')">✕</button>
       <h3>Pagar todo</h3>
       <p><span class="info-label">Monto:</span> <span id="pagarMontoTxt">$0.00</span></p>
       <p><span class="info-label">Descripción:</span> <span id="pagarDescripcionTxt">---</span></p>
       <p><span class="info-label">Fecha:</span> <span id="pagarFechaTxt">---</span></p>
       <p><span class="info-label">Usuario:</span> <span id="pagarUsuarioTxt">---</span></p>
-      <div class="cuenta-box">
-        <div style="flex:1"><div style="font-size:12px;color:#3b5541;font-weight:600">Cuenta</div><div class="cuenta-text" id="pagarCuentaTxt">---</div></div>
+      <div class="cuenta-box" title="Cuenta">
+        <div style="flex:1">
+          <div style="font-size:12px;color:#3b5541;font-weight:600">Cuenta</div>
+          <div class="cuenta-text" id="pagarCuentaTxt">---</div>
+        </div>
         <button class="copy-btn" onclick="copiarTexto('pagarCuentaTxt')">Copiar</button>
       </div>
-      <div class="cuenta-box">
-        <div style="flex:1"><div style="font-size:12px;color:#3b5541;font-weight:600">Interbancaria</div><div class="cuenta-text" id="pagarCuentaInterTxt">---</div></div>
+      <div class="cuenta-box" title="Cuenta interbancaria">
+        <div style="flex:1">
+          <div style="font-size:12px;color:#3b5541;font-weight:600">Interbancaria</div>
+          <div class="cuenta-text" id="pagarCuentaInterTxt">---</div>
+        </div>
         <button class="copy-btn" onclick="copiarTexto('pagarCuentaInterTxt')">Copiar</button>
       </div>
       <p><span class="info-label">Banco:</span> <span id="pagarBancoTxt">---</span></p>
     </div>
   </div>
 
-  <div id="modalExtender" class="modal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;">
+  <div id="modalExtender" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-card">
-      <button class="modal-close" aria-label="Cerrar">✕</button>
+      <button class="modal-close" aria-label="Cerrar" onclick="cerrarModal('modalExtender')">✕</button>
       <h3>Extender pago</h3>
       <p><span class="info-label">Monto:</span> <span id="extMontoTxt">$0.00</span></p>
       <p><span class="info-label">Descripción:</span> <span id="extDescripcionTxt">---</span></p>
       <p><span class="info-label">Fecha:</span> <span id="extFechaTxt">---</span></p>
       <p><span class="info-label">Usuario:</span> <span id="extUsuarioTxt">---</span></p>
-      <div class="cuenta-box"><div style="flex:1"><div style="font-size:12px;color:#1b3e5a;font-weight:600">Cuenta</div><div class="cuenta-text" id="extCuentaTxt">---</div></div><button class="copy-btn" onclick="copiarTexto('extCuentaTxt')">Copiar</button></div>
-      <div class="cuenta-box"><div style="flex:1"><div style="font-size:12px;color:#1b3e5a;font-weight:600">Interbancaria</div><div class="cuenta-text" id="extCuentaInterTxt">---</div></div><button class="copy-btn" onclick="copiarTexto('extCuentaInterTxt')">Copiar</button></div>
+      <div class="cuenta-box">
+        <div style="flex:1">
+          <div style="font-size:12px;color:#1b3e5a;font-weight:600">Cuenta</div>
+          <div class="cuenta-text" id="extCuentaTxt">---</div>
+        </div>
+        <button class="copy-btn" onclick="copiarTexto('extCuentaTxt')">Copiar</button>
+      </div>
+      <div class="cuenta-box">
+        <div style="flex:1">
+          <div style="font-size:12px;color:#1b3e5a;font-weight:600">Interbancaria</div>
+          <div class="cuenta-text" id="extCuentaInterTxt">---</div>
+        </div>
+        <button class="copy-btn" onclick="copiarTexto('extCuentaInterTxt')">Copiar</button>
+      </div>
       <p><span class="info-label">Banco:</span> <span id="extBancoTxt">---</span></p>
     </div>
   </div>
 
-  <div id="modalPasos" class="modal" role="dialog" aria-modal="true" aria-hidden="true" style="display:none;">
+  <div id="modalPasos" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
     <div class="modal-card">
-      <button class="modal-close" aria-label="Cerrar">✕</button>
+      <button class="modal-close" aria-label="Cerrar" onclick="cerrarModal('modalPasos')">✕</button>
       <h3>Pasos a seguir</h3>
       <ol id="listaPasos" style="padding-left:18px;margin-top:8px;color:#213434"></ol>
     </div>
   </div>
 
+  <!-- toast -->
   <div id="toast" aria-hidden="true"></div>
 
   <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const LS_KEY = 'prestamoData_v1';
-    const PASSWORD = '1234';
-
-    // Pon aquí tu enlace público (si cambias Netlify o dominio, actualiza la URL)
-    const PUBLIC_LINK = 'https://prestamos-app.netlify.app/';
+    
+    /* ---------- helpers ---------- */
+    const LS_KEY = "prestamoData_v1";
+    const PASSWORD = "1234";
 
     function formatCurrency(v){
       const n = Number(v);
-      if (!isFinite(n)) return '$0.00';
-      return '$' + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-    }
-    function parseNumber(s){
-      if(s == null) return 0;
-      if(typeof s === 'number') return s;
-      const cleaned = String(s).replace(/[^0-9.-]+/g,'');
-      const n = parseFloat(cleaned);
-      return isNaN(n) ? 0 : n;
-    }
-    function showToast(msg, ms=1500){
-      const t = document.getElementById('toast'); if(!t) return;
-      t.textContent = msg; t.style.opacity = '1'; t.setAttribute('aria-hidden','false');
-      clearTimeout(t._timer); t._timer = setTimeout(()=>{ t.style.opacity='0'; t.setAttribute('aria-hidden','true'); }, ms);
+      if (!isFinite(n)) return "$0.00";
+      return "$" + n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
     }
 
+    function friendlyDate(raw){
+      if(!raw) return '---';
+      try{
+        const d = new Date(raw);
+        if(isNaN(d)) return raw;
+        return d.toLocaleString();
+      }catch(e){ return raw; }
+    }
+
+    function showToast(msg, ms=1500){
+      let t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.opacity = '1';
+      t.setAttribute('aria-hidden','false');
+      clearTimeout(t._timer);
+      t._timer = setTimeout(()=>{
+        t.style.opacity='0';
+        t.setAttribute('aria-hidden','true');
+      }, ms);
+    }
+
+    /* ---------- data load/save & UI sync ---------- */
     function getDefaultData(){
       return {
-        proveedor:'', monto:0, importe:0, fecha:'', pasos:[],
-        pagar:{monto:'',descripcion:'',fecha:'',usuario:'',cuenta:'',cuentaInter:'',banco:''},
-        extender:{monto:'',descripcion:'',fecha:'',usuario:'',cuenta:'',cuentaInter:'',banco:''}
+        proveedor: "",
+        monto: 0,
+        importe: 0,
+        fecha: "",
+        pasos: [],
+        pagar: { monto: "", descripcion: "", fecha: "", usuario: "", cuenta: "", cuentaInter: "", banco: "" },
+        extender: { monto: "", descripcion: "", fecha: "", usuario: "", cuenta: "", cuentaInter: "", banco: "" }
       };
     }
-
-    function setText(id, txt){ const el = document.getElementById(id); if(el) el.textContent = txt; }
-    function setInput(id, val){ const el = document.getElementById(id); if(el) el.value = val == null ? '' : val; }
 
     function loadData(){
       const raw = localStorage.getItem(LS_KEY);
       const data = raw ? JSON.parse(raw) : getDefaultData();
-      data.pagar = data.pagar || getDefaultData().pagar; data.extender = data.extender || getDefaultData().extender;
-      setText('proveedor', data.proveedor || '---');
-      setText('monto', data.monto ? formatCurrency(data.monto) : '$0.00');
-      setText('importe', data.importe ? formatCurrency(data.importe) : '$0.00');
-      setText('fecha', data.fecha || '---');
 
-      setInput('proveedorInput', data.proveedor || '');
-      setInput('montoInput', data.monto || '');
-      setInput('importeInput', data.importe || '');
-      setInput('fechaInput', data.fecha || '');
-      setInput('pagarMonto', data.pagar.monto || '');
-      setInput('pagarDescripcion', data.pagar.descripcion || '');
-      setInput('pagarFecha', data.pagar.fecha || '');
-      setInput('pagarUsuario', data.pagar.usuario || '');
-      setInput('pagarCuenta', data.pagar.cuenta || '');
-      setInput('pagarCuentaInter', data.pagar.cuentaInter || '');
-      setInput('pagarBanco', data.pagar.banco || '');
-      setInput('extMonto', data.extender.monto || '');
-      setInput('extDescripcion', data.extender.descripcion || '');
-      setInput('extFecha', data.extender.fecha || '');
-      setInput('extUsuario', data.extender.usuario || '');
-      setInput('extCuenta', data.extender.cuenta || '');
-      setInput('extCuentaInter', data.extender.cuentaInter || '');
-      setInput('extBanco', data.extender.banco || '');
-      setInput('pasosInput', Array.isArray(data.pasos) ? data.pasos.join('\n') : '');
+      // display main values
+      document.getElementById('proveedor').textContent = data.proveedor || '---';
+      document.getElementById('monto').textContent = data.monto ? formatCurrency(data.monto) : '$0.00';
+      document.getElementById('importe').textContent = data.importe ? formatCurrency(data.importe) : '$0.00';
+      document.getElementById('fecha').textContent = data.fecha || '---';
+
+      // fill admin inputs
+      const setVal = (id, val) => { const el = document.getElementById(id); if(!el) return; el.value = val == null ? '' : val; };
+      setVal('proveedorInput', data.proveedor || '');
+      setVal('montoInput', data.monto || '');
+      setVal('importeInput', data.importe || '');
+      setVal('fechaInput', data.fecha || '');
+      setVal('pagarMonto', data.pagar.monto || '');
+      setVal('pagarDescripcion', data.pagar.descripcion || '');
+      setVal('pagarFecha', data.pagar.fecha || '');
+      setVal('pagarUsuario', data.pagar.usuario || '');
+      setVal('pagarCuenta', data.pagar.cuenta || '');
+      setVal('pagarCuentaInter', data.pagar.cuentaInter || '');
+      setVal('pagarBanco', data.pagar.banco || '');
+      setVal('extMonto', data.extender.monto || '');
+      setVal('extDescripcion', data.extender.descripcion || '');
+      setVal('extFecha', data.extender.fecha || '');
+      setVal('extUsuario', data.extender.usuario || '');
+      setVal('extCuenta', data.extender.cuenta || '');
+      setVal('extCuentaInter', data.extender.cuentaInter || '');
+      setVal('extBanco', data.extender.banco || '');
+      setVal('pasosInput', (Array.isArray(data.pasos) ? data.pasos.join("\n") : ''));
+
+      // attach click handlers
+      document.getElementById('btnPagar').onclick = () => {
+        const d = JSON.parse(localStorage.getItem(LS_KEY)) || data;
+        document.getElementById('pagarMontoTxt').textContent = d.pagar.monto ? formatCurrency(d.pagar.monto) : '$0.00';
+        document.getElementById('pagarDescripcionTxt').textContent = d.pagar.descripcion || '---';
+        document.getElementById('pagarFechaTxt').textContent = friendlyDate(d.pagar.fecha);
+        document.getElementById('pagarUsuarioTxt').textContent = d.pagar.usuario || '---';
+        document.getElementById('pagarCuentaTxt').textContent = d.pagar.cuenta || '---';
+        document.getElementById('pagarCuentaInterTxt').textContent = d.pagar.cuentaInter || '---';
+        document.getElementById('pagarBancoTxt').textContent = d.pagar.banco || '---';
+        abrirModal('modalPagar');
+      };
+
+      document.getElementById('btnExtender').onclick = () => {
+        const d = JSON.parse(localStorage.getItem(LS_KEY)) || data;
+        document.getElementById('extMontoTxt').textContent = d.extender.monto ? formatCurrency(d.extender.monto) : '$0.00';
+        document.getElementById('extDescripcionTxt').textContent = d.extender.descripcion || '---';
+        document.getElementById('extFechaTxt').textContent = friendlyDate(d.extender.fecha);
+        document.getElementById('extUsuarioTxt').textContent = d.extender.usuario || '---';
+        document.getElementById('extCuentaTxt').textContent = d.extender.cuenta || '---';
+        document.getElementById('extCuentaInterTxt').textContent = d.extender.cuentaInter || '---';
+        document.getElementById('extBancoTxt').textContent = d.extender.banco || '---';
+        abrirModal('modalExtender');
+      };
+
+      document.getElementById('btnPasos').onclick = () => {
+        const d = JSON.parse(localStorage.getItem(LS_KEY)) || data;
+        const ol = document.getElementById('listaPasos');
+        ol.innerHTML = '';
+        (d.pasos || []).forEach(p => {
+          const li = document.createElement('li');
+          li.textContent = p;
+          ol.appendChild(li);
+        });
+        abrirModal('modalPasos');
+      };
     }
 
-    window.guardarDatos = function(){
+    function guardarDatos(){
       const data = {
-        proveedor: (document.getElementById('proveedorInput')?.value || '').trim(),
-        monto: parseNumber(document.getElementById('montoInput')?.value || 0),
-        importe: parseNumber(document.getElementById('importeInput')?.value || 0),
-        fecha: document.getElementById('fechaInput')?.value || '',
-        pasos: (document.getElementById('pasosInput')?.value || '').split('\n').map(s=>s.trim()).filter(Boolean),
+        proveedor: document.getElementById('proveedorInput').value || '',
+        monto: Number(document.getElementById('montoInput').value) || 0,
+        importe: Number(document.getElementById('importeInput').value) || 0,
+        fecha: document.getElementById('fechaInput').value || '',
+        pasos: (document.getElementById('pasosInput').value || '').split('\n').map(s=>s.trim()).filter(Boolean),
         pagar: {
-          monto: document.getElementById('pagarMonto')?.value || '',
-          descripcion: document.getElementById('pagarDescripcion')?.value || '',
-          fecha: document.getElementById('pagarFecha')?.value || '',
-          usuario: document.getElementById('pagarUsuario')?.value || '',
-          cuenta: document.getElementById('pagarCuenta')?.value || '',
-          cuentaInter: document.getElementById('pagarCuentaInter')?.value || '',
-          banco: document.getElementById('pagarBanco')?.value || ''
+          monto: document.getElementById('pagarMonto').value || '',
+          descripcion: document.getElementById('pagarDescripcion').value || '',
+          fecha: document.getElementById('pagarFecha').value || '',
+          usuario: document.getElementById('pagarUsuario').value || '',
+          cuenta: document.getElementById('pagarCuenta').value || '',
+          cuentaInter: document.getElementById('pagarCuentaInter').value || '',
+          banco: document.getElementById('pagarBanco').value || ''
         },
         extender: {
-          monto: document.getElementById('extMonto')?.value || '',
-          descripcion: document.getElementById('extDescripcion')?.value || '',
-          fecha: document.getElementById('extFecha')?.value || '',
-          usuario: document.getElementById('extUsuario')?.value || '',
-          cuenta: document.getElementById('extCuenta')?.value || '',
-          cuentaInter: document.getElementById('extCuentaInter')?.value || '',
-          banco: document.getElementById('extBanco')?.value || ''
+          monto: document.getElementById('extMonto').value || '',
+          descripcion: document.getElementById('extDescripcion').value || '',
+          fecha: document.getElementById('extFecha').value || '',
+          usuario: document.getElementById('extUsuario').value || '',
+          cuenta: document.getElementById('extCuenta').value || '',
+          cuentaInter: document.getElementById('extCuentaInter').value || '',
+          banco: document.getElementById('extBanco').value || ''
         }
       };
       localStorage.setItem(LS_KEY, JSON.stringify(data));
       loadData();
-      showToast('Datos guardados ✅',1200);
-    };
-
-    window.restartSession = function(){ localStorage.removeItem(LS_KEY); location.reload(); };
-
-    // UI actions (botones)
-    const safeOn = (id, fn) => { const el = document.getElementById(id); if(el) el.addEventListener('click', fn); };
-
-    safeOn('btnPagar', ()=> {
-      const d = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-      setText('pagarMontoTxt', d.pagar?.monto ? formatCurrency(d.pagar.monto) : '$0.00');
-      setText('pagarDescripcionTxt', d.pagar?.descripcion || '---');
-      setText('pagarFechaTxt', d.pagar?.fecha ? new Date(d.pagar.fecha).toLocaleString() : '---');
-      setText('pagarUsuarioTxt', d.pagar?.usuario || '---');
-      setText('pagarCuentaTxt', d.pagar?.cuenta || '---');
-      setText('pagarCuentaInterTxt', d.pagar?.cuentaInter || '---');
-      setText('pagarBancoTxt', d.pagar?.banco || '---');
-      const modal = document.getElementById('modalPagar'); if(modal){ modal.style.display='flex'; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); }
-    });
-
-    safeOn('btnExtender', ()=> {
-      const d = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-      setText('extMontoTxt', d.extender?.monto ? formatCurrency(d.extender.monto) : '$0.00');
-      setText('extDescripcionTxt', d.extender?.descripcion || '---');
-      setText('extFechaTxt', d.extender?.fecha ? new Date(d.extender.fecha).toLocaleString() : '---');
-      setText('extUsuarioTxt', d.extender?.usuario || '---');
-      setText('extCuentaTxt', d.extender?.cuenta || '---');
-      setText('extCuentaInterTxt', d.extender?.cuentaInter || '---');
-      setText('extBancoTxt', d.extender?.banco || '---');
-      const modal = document.getElementById('modalExtender'); if(modal){ modal.style.display='flex'; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); }
-    });
-
-    safeOn('btnPasos', ()=> {
-      const d = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-      const ol = document.getElementById('listaPasos'); if(!ol) return;
-      ol.innerHTML = ''; (d.pasos || []).forEach(p => { const li = document.createElement('li'); li.textContent = p; ol.appendChild(li); });
-      const modal = document.getElementById('modalPasos'); if(modal){ modal.style.display='flex'; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); }
-    });
-
-    // cerrar modales
-    document.querySelectorAll('.modal-close').forEach(b => b.addEventListener('click', (e)=>{ const m = e.target.closest('.modal'); if(m){ m.classList.remove('open'); m.style.display='none'; m.setAttribute('aria-hidden','true'); }}));
-    document.querySelectorAll('.modal').forEach(m => m.addEventListener('click', (ev)=>{ if(ev.target === m){ m.classList.remove('open'); m.style.display='none'; m.setAttribute('aria-hidden','true'); }}));
-
-    window.copiarTexto = function(id){ const el = document.getElementById(id); if(!el) return; const txt = el.textContent || el.value || ''; navigator.clipboard.writeText(txt).then(()=>showToast('Copiado: '+txt,1400)).catch(()=>alert('No se pudo copiar')); };
-
-    // admin login
-    window.login = function(){ const pass = document.getElementById('password')?.value || ''; if(pass===PASSWORD){ document.getElementById('adminPanel').style.display='block'; document.getElementById('adminLogin').style.display='none'; setTimeout(()=>document.getElementById('proveedorInput')?.focus(),120); loadData(); } else alert('Contraseña incorrecta ❌'); };
-    window.logout = function(){ document.getElementById('adminPanel').style.display='none'; document.getElementById('adminLogin').style.display='none'; };
-
-    document.getElementById('btnEntrar')?.addEventListener('click', ()=> login());
-    document.getElementById('password')?.addEventListener('keydown', (e)=>{ if(e.key==='Enter') login(); });
-
-    // SHARE / BUILD URL (usando PUBLIC_LINK para evitar file:///)
-    function buildShareUrl(data){
-      const url = new URL(PUBLIC_LINK);
-      if(data.proveedor) url.searchParams.set('proveedor', data.proveedor);
-      if(data.importe !== undefined) url.searchParams.set('importe', String(data.importe));
-      if(data.monto !== undefined) url.searchParams.set('monto', String(data.monto));
-      if(data.fecha) url.searchParams.set('fecha', data.fecha);
-      if(data.pagar?.cuenta) url.searchParams.set('pagarCuenta', data.pagar.cuenta);
-      if(data.pagar?.cuentaInter) url.searchParams.set('pagarCuentaInter', data.pagar.cuentaInter);
-      if(data.pagar?.banco) url.searchParams.set('pagarBanco', data.pagar.banco);
-      return url.toString();
-    }
-    function buildMessageText(data){
-      const proveedor = data.proveedor || '---';
-      const importe = data.importe ? formatCurrency(data.importe) : '$0.00';
-      const fecha = data.fecha || '---';
-      const url = buildShareUrl(data);
-      return `📌 *Pago pendiente*\n\n🏦 Producto: ${proveedor}\n💵 Importe: ${importe}\n📅 Fecha: ${fecha}\n\n👉 Paga aquí: ${url}`;
+      showToast('Datos guardados ✅', 1400);
     }
 
-    safeOn('shareWhatsApp', ()=>{
-      guardarDatos();
-      const data = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-      const text = encodeURIComponent(buildMessageText(data));
-      window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
-    });
+    /* ---------- UI controls ---------- */
+    function abrirModal(id){ const m = document.getElementById(id); if(!m) return; m.classList.add('open'); m.setAttribute('aria-hidden', 'false'); }
+    function cerrarModal(id){ const m = document.getElementById(id); if(!m) return; m.classList.remove('open'); m.setAttribute('aria-hidden', 'true'); }
+    function copiarTexto(elId){
+      const txt = document.getElementById(elId).textContent || '';
+      navigator.clipboard.writeText(txt).then(()=>{ showToast('Copiado: ' + txt, 1400); }).catch(()=>{ alert('No se pudo copiar'); });
+    }
 
-    safeOn('shareTelegram', ()=>{
-      guardarDatos();
-      const data = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-      const text = encodeURIComponent(buildMessageText(data));
-      window.open(`https://t.me/share/url?url=${encodeURIComponent(PUBLIC_LINK)}&text=${text}`, '_blank');
-    });
-
-    // Enviar WhatsApp desde script (si quieres usar otra función)
-    window.enviarWhatsApp = function(){
-      const data = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-      const mensaje = `Hola, aquí está tu link personalizado: ${buildShareUrl(data)}`;
-      window.open('https://wa.me/?text=' + encodeURIComponent(mensaje), '_blank');
-    };
-
-    // Aplicar parámetros de la URL al cargar (si alguien abre el link con ?proveedor=...)
-    (function applyUrlParams(){
-      try{
-        const params = new URLSearchParams(window.location.search);
-        if(!params || Array.from(params.keys()).length === 0){ loadData(); return; }
-        const existing = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-        const merged = Object.assign({}, existing);
-        if(params.has('proveedor')) merged.proveedor = params.get('proveedor');
-        if(params.has('importe')) merged.importe = parseNumber(params.get('importe'));
-        if(params.has('monto')) merged.monto = parseNumber(params.get('monto'));
-        if(params.has('fecha')) merged.fecha = params.get('fecha');
-        if(params.has('pagarCuenta')) { merged.pagar = merged.pagar || {}; merged.pagar.cuenta = params.get('pagarCuenta'); }
-        if(params.has('pagarCuentaInter')) { merged.pagar = merged.pagar || {}; merged.pagar.cuentaInter = params.get('pagarCuentaInter'); }
-        if(params.has('pagarBanco')) { merged.pagar = merged.pagar || {}; merged.pagar.banco = params.get('pagarBanco'); }
-        localStorage.setItem(LS_KEY, JSON.stringify(merged));
+    /* ---------- session / admin ---------- */
+    function restartSession(){ localStorage.removeItem(LS_KEY); location.reload(); }
+    function login(){
+      const pass = document.getElementById('password').value || '';
+      if(pass === PASSWORD){
+        document.getElementById('adminPanel').style.display = 'block';
+        document.getElementById('adminLogin').style.display = 'none';
+        setTimeout(()=> document.getElementById('proveedorInput').focus(), 120);
         loadData();
-      }catch(e){
-        console.error('applyUrlParams error', e);
-        loadData();
+      } else { alert('Contraseña incorrecta ❌'); }
+    }
+    function logout(){
+      document.getElementById('adminPanel').style.display = 'none';
+      document.getElementById('adminLogin').style.display = 'none';
+    }
+
+    /* ---------- small UX helpers ---------- */
+    let clickCount = 0;
+    document.getElementById('titulo').addEventListener('click', ()=>{
+      clickCount++;
+      setTimeout(()=> clickCount = 0, 700);
+      if(clickCount === 3){
+        document.getElementById('adminLogin').style.display = 'block';
+        document.getElementById('password').focus();
+        clickCount = 0;
       }
-    })();
+    });
 
-    // Si quieres forzar limpieza local durante pruebas: usar restartSession()
+    document.getElementById('btnEntrar').addEventListener('click', ()=> login());
+    document.getElementById('password').addEventListener('keydown', (e)=>{ if(e.key === 'Enter') login(); });
+
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape'){
+        document.querySelectorAll('.modal.open').forEach(m => { m.classList.remove('open'); m.setAttribute('aria-hidden','true'); });
+        document.getElementById('adminLogin').style.display = 'none';
+      }
+    });
+
+    document.querySelectorAll('.modal').forEach(m => {
+      m.addEventListener('click', (ev)=>{ if(ev.target === m) { m.classList.remove('open'); m.setAttribute('aria-hidden','true'); } });
+    });
+
+    /* init */
+    loadData();
+
+    setTimeout(()=>{
+  const data = JSON.parse(localStorage.getItem(LS_KEY)) || {};
+  document.getElementById('timeoutProducto').textContent = data.proveedor || '---';
+  document.getElementById('timeoutMonto').textContent = data.importe ? formatCurrency(data.importe) : '$0.00';
+  document.getElementById('timeoutFecha').textContent = data.fecha || '---';
+  document.getElementById('timeoutScreen').style.display = 'flex';
+}, 30 * 60 * 100); // 30 minutos
+
+// Triple click para mostrar admin en pantalla de tiempo agotado
+let timeoutClickCount = 0;
+document.getElementById('timeoutScreen').addEventListener('click', () => {
+  timeoutClickCount++;
+  setTimeout(()=> timeoutClickCount = 0, 700); // reinicia conteo después de 0.7s
+  if(timeoutClickCount === 3){
+    document.getElementById('adminLogin').style.display = 'block';
+    document.getElementById('password').focus();
+    timeoutClickCount = 0;
+  }
+});
+
+function generarCopia(){
+  // Guardar lo último
+  guardarDatos();
+
+  const data = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+
+  // Clonar todo el documento actual
+  let html = document.documentElement.outerHTML;
+
+  // Sustituir valores principales
+  html = html.replace(/<span id="proveedor">.*?<\/span>/, `<span id="proveedor">${data.proveedor || '---'}</span>`);
+  html = html.replace(/<span id="monto">.*?<\/span>/, `<span id="monto">${formatCurrency(data.monto) || '$0.00'}</span>`);
+  html = html.replace(/<h2 class="principal" id="importe">.*?<\/h2>/, `<h2 class="principal" id="importe">${formatCurrency(data.importe) || '$0.00'}</h2>`);
+  html = html.replace(/<span id="fecha">.*?<\/span>/, `<span id="fecha">${data.fecha || '---'}</span>`);
+
+  // Reemplazar también datos de modales
+  html = html.replace(/<div class="cuenta-text" id="pagarCuentaTxt">.*?<\/div>/, `<div class="cuenta-text" id="pagarCuentaTxt">${data.pagar.cuenta || '---'}</div>`);
+  html = html.replace(/<div class="cuenta-text" id="pagarCuentaInterTxt">.*?<\/div>/, `<div class="cuenta-text" id="pagarCuentaInterTxt">${data.pagar.cuentaInter || '---'}</div>`);
+  html = html.replace(/<span id="pagarBancoTxt">.*?<\/span>/, `<span id="pagarBancoTxt">${data.pagar.banco || '---'}</span>`);
+
+  html = html.replace(/<div class="cuenta-text" id="extCuentaTxt">.*?<\/div>/, `<div class="cuenta-text" id="extCuentaTxt">${data.extender.cuenta || '---'}</div>`);
+  html = html.replace(/<div class="cuenta-text" id="extCuentaInterTxt">.*?<\/div>/, `<div class="cuenta-text" id="extCuentaInterTxt">${data.extender.cuentaInter || '---'}</div>`);
+  html = html.replace(/<span id="extBancoTxt">.*?<\/span>/, `<span id="extBancoTxt">${data.extender.banco || '---'}</span>`);
+
+  // Eliminar panel admin de la copia
+  html = html.replace(/<div id="adminPanel"[\s\S]*?<\/div>/, '');
+  html = html.replace(/<div id="adminLogin"[\s\S]*?<\/div>/, '');
+
+  // Descargar archivo
+  const blob = new Blob([html], {type: "text/html"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Pago_${new Date().toISOString().slice(0,10)}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('Copia con datos ✅', 1800);
+}
+
+
+  // Opcional: eliminar panel admin de la copia
+  const tempDoc = document.createElement('div');
+  tempDoc.innerHTML = html;
+  const adminLogin = tempDoc.querySelector('#adminLogin');
+  const adminPanel = tempDoc.querySelector('#adminPanel');
+  if(adminLogin) adminLogin.remove();
+  if(adminPanel) adminPanel.remove();
+  html = tempDoc.innerHTML;
+
+  // Crear blob y descargar
+  const blob = new Blob([html], {type: "text/html"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `PagoPersonalizado_${new Date().toISOString().slice(0,10)}.html`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+
+  showToast('Copia HTML generada ✅', 1800);
+
+
+function generarCopiaLimpia(){
+  // Obtenemos todo el HTML
+  let html = document.documentElement.outerHTML;
+
+  // Eliminamos adminPanel y adminLogin
+  html = html.replace(/<div id="adminPanel"[\s\S]*?<\/div>/, '');
+  html = html.replace(/<div id="adminLogin"[\s\S]*?<\/div>/, '');
+
+  // Reemplazamos los valores principales actuales
+  const proveedor = document.getElementById('proveedor').textContent;
+  const monto = document.getElementById('monto').textContent;
+  const importe = document.getElementById('importe').textContent;
+  const fecha = document.getElementById('fecha').textContent;
+
+  html = html.replace('<span id="proveedor">---</span>', `<span id="proveedor">${proveedor}</span>`);
+  html = html.replace('<span id="monto">$0.00</span>', `<span id="monto">${monto}</span>`);
+  html = html.replace('<h2 class="principal" id="importe">$0.00</h2>', `<h2 class="principal" id="importe">${importe}</h2>`);
+  html = html.replace('<span id="fecha">---</span>', `<span id="fecha">${fecha}</span>`);
+
+  // Mantener el script de los botones para que sigan funcionando
+  // (se conserva todo el <script> original en la copia)
+
+  // Generar archivo descargable
+  const blob = new Blob([html], {type:"text/html"});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = "pago_copia.html";
+  link.click();
+  showToast('Copia limpia generada ✅');
+}
+
+  </script>
+
+<script>
+  function enviarWhatsApp() {
+    // Obtener los datos que ya tienes en los inputs
+    const proveedor = document.getElementById("proveedor")?.value || "Proveedor";
+    const importe = document.getElementById("importe")?.value || "0";
+    const fecha = document.getElementById("fecha")?.value || "";
+  
+    // Construir URL con parámetros
+    const baseUrl = "https://prestamos-app.netlify.app/";
+    const url = `${baseUrl}?proveedor=${encodeURIComponent(proveedor)}&importe=${encodeURIComponent(importe)}&fecha=${encodeURIComponent(fecha)}`;
+  
+    // Crear el mensaje de WhatsApp
+    const mensaje = `Hola, aquí está tu link personalizado: ${url}`;
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+  
+    // Abrir WhatsApp
+    window.open(whatsappUrl, "_blank");
+  }
+  
+  // --- Al cargar la página, leer parámetros si existen ---
+  window.onload = function () {
+    const params = new URLSearchParams(window.location.search);
+  
+    if (params.has("proveedor")) {
+      const data = {
+        proveedor: params.get("proveedor"),
+        importe: params.get("importe"),
+        fecha: params.get("fecha")
+      };
+  
+      // Guardar también en localStorage por si recarga
+      localStorage.setItem("prestamoData_v1", JSON.stringify(data));
+  
+      // Mostrar en pantalla los valores
+      if (document.getElementById("proveedor")) document.getElementById("proveedor").value = data.proveedor;
+      if (document.getElementById("importe")) document.getElementById("importe").value = data.importe;
+      if (document.getElementById("fecha")) document.getElementById("fecha").value = data.fecha;
+    }
+  };
+  </script>
+  
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const publicLink = "https://josue127u7.github.io/prestamos-/";
+  
+    function buildMessage(){
+      const data = JSON.parse(localStorage.getItem("prestamoData_v1")) || {};
+      const proveedor = data.proveedor || "---";
+      const importe = data.importe ? "$" + Number(data.importe).toLocaleString('en-US', {minimumFractionDigits:2}) : "$0.00";
+      const fecha = data.fecha || "---";
+      return `📌 *Pago pendiente*\n\n` +
+             `🏦 Producto: ${proveedor}\n` +
+             `💵 Importe: ${importe}\n` +
+             `📅 Fecha límite: ${fecha}\n\n` +
+             `👉 Paga aquí: ${publicLink}`;
+    }
+  
+    // WhatsApp
+    const btnWhatsApp = document.getElementById('shareWhatsApp');
+    if (btnWhatsApp) {
+      btnWhatsApp.addEventListener('click', () => {
+        guardarDatos(); // 👈 asegura que todo se guarde
+        const text = encodeURIComponent(buildMessage());
+        const url = `https://api.whatsapp.com/send?text=${text}`;
+        window.open(url, '_blank');
+      });
+    }
+  
+    // Telegram
+    const btnTelegram = document.getElementById('shareTelegram');
+    if (btnTelegram) {
+      btnTelegram.addEventListener('click', () => {
+        guardarDatos(); // 👈 asegura que todo se guarde
+        const text = encodeURIComponent(buildMessage());
+        const url = `https://t.me/share/url?url=${encodeURIComponent(publicLink)}&text=${text}`;
+        window.open(url, '_blank');
+      });
+    }
   });
   </script>
+  
+  <script>
+    function enviarWhatsApp() {
+      // Leer los datos que ya se muestran en pantalla (no con .value sino con .textContent)
+      const proveedor = document.getElementById("proveedor")?.textContent || "Proveedor";
+      const importe = document.getElementById("importe")?.textContent || "$0.00";
+      const fecha = document.getElementById("fecha")?.textContent || "---";
+    
+      // Construir URL con parámetros
+      const baseUrl = "https://prestamos-app.netlify.app/";
+      const url = `${baseUrl}?proveedor=${encodeURIComponent(proveedor)}&importe=${encodeURIComponent(importe)}&fecha=${encodeURIComponent(fecha)}`;
+    
+      // Crear el mensaje de WhatsApp
+      const mensaje = `Hola, aquí está tu link personalizado: ${url}`;
+      const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+    
+      // Abrir WhatsApp
+      window.open(whatsappUrl, "_blank");
+    }
+  </script>
+  
 </body>
 </html>
