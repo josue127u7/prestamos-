@@ -441,13 +441,13 @@
   <div id="toast" aria-hidden="true"></div>
 
   <script>
-    
+
     /* ---------- helpers ---------- */
     const LS_KEY = "prestamoData_v1";
     const PASSWORD = "1234";
 
     /* Ajusta sólo esta URL si cambias de hosting */
-    const PUBLIC_LINK = "https://prestamos-app.netlify.app/"; // <- usa tu link Netlify aquí
+    const PUBLIC_LINK = "https://prestamos-app.netlify.app/?modo=publico"; // <- usa tu link Netlify aquí
 
     function formatCurrency(v){
       const n = Number(v);
@@ -863,5 +863,139 @@
     }catch(e){/* no crítico */}
   </script>
 
+  <!-- 🔥 Firebase integration (added below) -->
+  <script type="module">
+    // 🔥 Firebase: imports (modular SDK)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+    // 🔥 REPLACE with your Firebase config object
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_PROYECTO.firebaseapp.com",
+      projectId: "TU_PROYECTO",
+      storageBucket: "TU_PROYECTO.appspot.com",
+      messagingSenderId: "TU_MESSAGING_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
+
+    // 🔥 initialize
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // 🔥 document reference used by this app
+    const FIRE_DOC_REF = doc(db, "prestamos", "activo");
+
+    // 🔥 sign in anonymously
+    signInAnonymously(auth).then(()=>{
+      console.log("Firebase: signed in anonymously");
+      showToast('Conectado a Firebase ✅', 1200);
+      // once signed in, try to read Firestore and sync to localStorage/UI
+      syncFromFirestoreToLocalAndUI();
+      startRealtimeSync();
+    }).catch(err=>{
+      console.warn("Firebase auth error:", err);
+      showToast('No se pudo conectar a Firebase (modo offline)', 1500);
+    });
+
+    // 🔥 helper: sync Firestore -> localStorage & UI
+    async function syncFromFirestoreToLocalAndUI(){
+      try{
+        const snap = await getDoc(FIRE_DOC_REF);
+        if(snap.exists()){
+          const data = snap.data();
+          // ensure structure matches existing keys; save into localStorage under same LS_KEY
+          localStorage.setItem(LS_KEY, JSON.stringify(data));
+          // reload UI from localStorage (existing loadData reads LS)
+          loadData();
+          showToast('Datos sincronizados desde Firestore', 1200);
+        } else {
+          console.log("Firestore: no document yet");
+        }
+      }catch(e){
+        console.error("Error reading Firestore:", e);
+      }
+    }
+
+    // 🔥 start realtime listener to keep UI in sync when doc changes
+    let unsubscribeRealtime = null;
+    function startRealtimeSync(){
+      if(unsubscribeRealtime) return;
+      try{
+        unsubscribeRealtime = onSnapshot(FIRE_DOC_REF, snap=>{
+          if(snap.exists()){
+            const data = snap.data();
+            // update local storage and UI
+            localStorage.setItem(LS_KEY, JSON.stringify(data));
+            loadData();
+            console.log("Realtime: UI updated from Firestore");
+          }
+        }, err=>{
+          console.error("Realtime snapshot error:", err);
+        });
+      }catch(e){
+        console.error("startRealtimeSync error:", e);
+      }
+    }
+
+    // 🔥 override guardarDatos to also write to Firestore while preserving original behavior
+    try{
+      // keep reference to original guardarDatos
+      const originalGuardar = window.guardarDatos;
+      window.guardarDatos = async function(...args){
+        // call original (it saves to localStorage and updates UI)
+        try{
+          const res = originalGuardar.apply(this, args);
+          // now also write to Firestore using the localStorage value
+          const raw = localStorage.getItem(LS_KEY);
+          if(raw){
+            const data = JSON.parse(raw);
+            try{
+              await setDoc(FIRE_DOC_REF, data, { merge: true });
+              showToast('Datos guardados en Firestore ✅', 1400);
+            }catch(e){
+              console.error("Error al guardar en Firestore:", e);
+              showToast('Error al guardar en Firestore', 1600);
+            }
+          }
+          return res;
+        }catch(err){
+          console.error("Error running original guardarDatos:", err);
+        }
+      };
+    }catch(e){
+      console.error("No se pudo sobreescribir guardarDatos:", e);
+    }
+
+    // 🔥 add a migration function to push existing LS into Firestore (call from console if needed)
+    window.migrateLocalToFirestore = async function(){
+      const raw = localStorage.getItem(LS_KEY);
+      if(!raw){ showToast('No hay datos locales para migrar'); return; }
+      try{
+        const data = JSON.parse(raw);
+        await setDoc(FIRE_DOC_REF, data, { merge: true });
+        showToast('Migración a Firestore completa ✅', 1600);
+      }catch(e){
+        console.error("Migración error:", e);
+        showToast('Error migrando datos', 1600);
+      }
+    };
+
+    // 🔥 also provide a function to force-sync Firestore -> local/UI
+    window.syncFromFirestore = syncFromFirestoreToLocalAndUI;
+
+    // 🔥 when auth state changes, we can start/stop realtime sync
+    onAuthStateChanged(auth, user => {
+      if(user){
+        startRealtimeSync();
+      } else {
+        if(unsubscribeRealtime){ unsubscribeRealtime(); unsubscribeRealtime = null; }
+      }
+    });
+
+    // 🔥 end of firebase integration script
+  </script>
 </body>
 </html>
