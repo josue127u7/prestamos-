@@ -283,10 +283,61 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   }
 
+/* ---------- Ventana de tiempo agotado ---------- */
+#tiempoAgotado {
+  display: none; /* Oculto al inicio */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+#tiempoAgotado .card {
+  background: #fff;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 350px;
+  box-shadow: 0px 4px 15px rgba(0,0,0,0.3);
+}
+#tiempoAgotado h1 {
+  color: red;
+}
+#tiempoAgotado .emoji {
+  font-size: 50px;
+  margin-bottom: 10px;
+}
+
+.overlay .card {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0px 4px 15px rgba(0,0,0,0.3);
+}
+.overlay h1 {
+  color: red;
+}
+.overlay .emoji {
+  font-size: 50px;
+  margin-bottom: 10px;
+}
 
   </style>
 </head>
 <body>
+  <!-- Ventana de Tiempo Agotado -->
+<div id="tiempoAgotado" class="overlay">
+  <div class="card">
+    <div class="emoji">⏰</div>
+    <h1>Tiempo agotado</h1>
+    <p>Tu sesión ha finalizado por exceder los 30 minutos.</p>
+  </div>
+</div>
 
    <!-- Imagen decorativa en la esquina superior izquierda -->
    <img src="https://josue127u7.github.io/imagen-pay/cropped-payment.png" 
@@ -997,5 +1048,18 @@
 
     // 🔥 end of firebase integration script
   </script>
+  <script>
+    // Después de 30 minutos (1800000 ms) muestra la ventana de tiempo agotado
+    setTimeout(() => {
+      document.getElementById("tiempoAgotado").style.display = "flex";
+    }, 1800000); // 30 minutos
+    /* ---------- tiempo agotado ---------- */
+
+setTimeout(() => {
+  document.getElementById("tiempoAgotado").style.display = "flex";
+}, 30 * 60 * 1000);
+
+  </script>
+  
 </body>
 </html>
