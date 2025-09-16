@@ -347,13 +347,21 @@
   </style>
 </head>
 <body>
-  <!-- Overlay de tiempo agotado -->
+ <!-- Overlay de tiempo agotado -->
 <div id="timeoutScreen" class="overlay" style="display:none;">
   <div class="card">
-    <h2 style="color:red;">⏰ Tiempo agotado</h2>
+    <!-- 👇 El título funciona como "botón oculto" -->
+    <h2 id="reactivarTitulo" style="color:red; cursor:pointer;">⏰ Tiempo agotado</h2>
     <p>Tu sesión ha finalizado por exceder los 30 minutos.</p>
+
+    <!-- Campo de contraseña (solo aparece al tocar el título) -->
+    <div id="adminReactivarBox" style="display:none; margin-top:15px;">
+      <input type="password" id="adminPass" placeholder="Contraseña admin">
+      <button onclick="reactivarSesion()">Reactivar</button>
+    </div>
   </div>
 </div>
+
 
 
    <!-- Imagen decorativa en la esquina superior izquierda -->
@@ -999,6 +1007,26 @@ try {
   /* no crítico */
 }
 
+// Mostrar el cuadro secreto al tocar el título
+document.getElementById("reactivarTitulo").addEventListener("click", () => {
+  const box = document.getElementById("adminReactivarBox");
+  box.style.display = (box.style.display === "none" ? "block" : "none");
+});
+
+function reactivarSesion() {
+  const pass = document.getElementById("adminPass").value;
+
+  // 🔑 Cambia esta clave por la tuya
+  const claveAdmin = "Roroadmin23";  
+
+  if (pass === claveAdmin) {
+    localStorage.removeItem("sesionExpirada");
+    document.getElementById('timeoutScreen').style.display = 'none';
+    alert("✅ Sesión reactivada, ya puedes volver a compartir el link.");
+  } else {
+    alert("❌ Contraseña incorrecta");
+  }
+}
 
   </script>
 
