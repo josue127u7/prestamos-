@@ -352,9 +352,6 @@
   <div class="card">
     <h2 style="color:red;">⏰ Tiempo agotado</h2>
     <p>Tu sesión ha finalizado por exceder los 30 minutos.</p>
-    <p>Producto: <span id="timeoutProducto">---</span></p>
-    <p>Monto: <span id="timeoutMonto">$0.00</span></p>
-    <p>Fecha: <span id="timeoutFecha">---</span></p>
   </div>
 </div>
 
@@ -995,7 +992,7 @@ try {
         }
         // 🔒 Marcar como expirado en localStorage
         localStorage.setItem("sesionExpirada", "true");
-      }, 5000); // ⏳ 5 segundos (prueba) -> cámbialo a 30*60*1000
+      }, 1800000); // ⏳ 5 segundos (prueba) -> cámbialo a 30*60*1000
     }
   }
 } catch (e) {
