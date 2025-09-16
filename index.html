@@ -331,7 +331,7 @@
 </head>
 <body>
   <!-- Ventana de Tiempo Agotado -->
-<div id="tiempoAgotado" class="overlay">
+<div id="tiempoAgotado" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
   <div class="card">
     <div class="emoji">⏰</div>
     <h1>Tiempo agotado</h1>
@@ -673,7 +673,7 @@
 
     /* ---------- small UX helpers ---------- */
     let clickCount = 0;
-    document.getElementById('titulo').addEventListener('click', ()=>{ 
+    document.getElementById('titulo').addEventListener('click', ()=>{
       clickCount++;
       setTimeout(()=> clickCount = 0, 700);
       if(clickCount === 3){
@@ -742,7 +742,10 @@
 
     // Handler general para WhatsApp (usa PUBLIC_LINK y datos guardados)
     function enviarPorWhatsAppWithDataObj(data){
-      const url = buildShareUrl(data);
+      // build URL and add src param so recipients open with src=whatsapp
+      const u = new URL(buildShareUrl(data));
+      u.searchParams.set('src','whatsapp');
+      const url = u.toString();
       const msg = buildMessage(data, url);
       // Abrir en nueva ventana (wa.me se recomienda para móviles)
       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
@@ -750,7 +753,9 @@
 
     // Handler general para Telegram
     function enviarPorTelegramWithDataObj(data){
-      const url = buildShareUrl(data);
+      const u = new URL(buildShareUrl(data));
+      u.searchParams.set('src','telegram');
+      const url = u.toString();
       const msg = buildMessage(data, url);
       window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(msg)}`, '_blank');
     }
@@ -902,7 +907,46 @@
     // Luego cargar UI desde localStorage
     loadData();
 
-    // timeoutScreen code left intact (si lo usas en el futuro)
+    // Si la URL tiene src=whatsapp o src=telegram entonces arrancamos el temporizador de 30 minutos
+    (function setupTimeoutIfShared(){
+      const params = new URLSearchParams(window.location.search);
+      const src = params.get('src');
+      if(src === 'whatsapp' || src === 'telegram'){
+        const TIMER_MS = 30 * 60 * 1000; // 30 minutos
+        setTimeout(()=>{
+          const overlay = document.getElementById('tiempoAgotado');
+          if(overlay){
+            overlay.style.display = 'flex';
+            overlay.setAttribute('aria-hidden','false');
+          }
+        }, TIMER_MS);
+      }
+    })();
+
+    // Cuando el overlay de "tiempoAgotado" sea clickeado, mostramos las funciones de admin (login)
+    (function attachOverlayClick(){
+      const overlay = document.getElementById('tiempoAgotado');
+      if(!overlay) return;
+      overlay.addEventListener('click', (e)=>{
+        // Mostrar admin login y ocultar el overlay
+        const adminLogin = document.getElementById('adminLogin');
+        if(adminLogin){
+          adminLogin.style.display = 'block';
+          adminLogin.setAttribute('aria-hidden','false');
+          // focus en el input password si existe
+          const pwd = document.getElementById('password');
+          if(pwd) pwd.focus();
+        }
+        // ocultar overlay para que no bloquee la UI
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden','true');
+      });
+      // evitar que clicks dentro de la card burbujeen (opcional)
+      const card = overlay.querySelector('.card');
+      if(card) card.addEventListener('click', (ev)=> ev.stopPropagation());
+    })();
+
+    // timeoutScreen code left intact (si lo usas en el futuro) - corrijo la constante a ms
     try{
       setTimeout(()=>{
         const data = JSON.parse(localStorage.getItem(LS_KEY)) || {};
@@ -910,7 +954,7 @@
         if(document.getElementById('timeoutMonto')) document.getElementById('timeoutMonto').textContent = data.importe ? formatCurrency(data.importe) : '$0.00';
         if(document.getElementById('timeoutFecha')) document.getElementById('timeoutFecha').textContent = data.fecha || '---';
         if(document.getElementById('timeoutScreen')) document.getElementById('timeoutScreen').style.display = 'flex';
-      }, 30 * 60 * 100); // 30 minutos (se mantiene)
+      }, 30 * 60 * 1000); // 30 minutos
     }catch(e){/* no crítico */}
   </script>
 
@@ -1048,18 +1092,5 @@
 
     // 🔥 end of firebase integration script
   </script>
-  <script>
-    // Después de 30 minutos (1800000 ms) muestra la ventana de tiempo agotado
-    setTimeout(() => {
-      document.getElementById("tiempoAgotado").style.display = "flex";
-    }, 1800000); // 30 minutos
-    /* ---------- tiempo agotado ---------- */
-
-setTimeout(() => {
-  document.getElementById("tiempoAgotado").style.display = "flex";
-}, 30 * 60 * 1000);
-
-  </script>
-  
 </body>
 </html>
