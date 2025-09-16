@@ -946,16 +946,33 @@
       if(card) card.addEventListener('click', (ev)=> ev.stopPropagation());
     })();
 
-    // timeoutScreen code left intact (si lo usas en el futuro) - corrijo la constante a ms
-    try{
-      setTimeout(()=>{
-        const data = JSON.parse(localStorage.getItem(LS_KEY)) || {};
-        if(document.getElementById('timeoutProducto')) document.getElementById('timeoutProducto').textContent = data.proveedor || '---';
-        if(document.getElementById('timeoutMonto')) document.getElementById('timeoutMonto').textContent = data.importe ? formatCurrency(data.importe) : '$0.00';
-        if(document.getElementById('timeoutFecha')) document.getElementById('timeoutFecha').textContent = data.fecha || '---';
-        if(document.getElementById('timeoutScreen')) document.getElementById('timeoutScreen').style.display = 'flex';
-      }, 30 * 60 * 1000); // 30 minutos
-    }catch(e){/* no crítico */}
+   // timeoutScreen code - versión de prueba (5 segundos)
+try {
+  const params = new URLSearchParams(window.location.search);
+  const src = params.get("src"); 
+
+  // Solo activa si la URL tiene ?src=whatsapp o ?src=telegram
+  if (src === "whatsapp" || src === "telegram") {
+    setTimeout(() => {
+      const data = JSON.parse(localStorage.getItem(LS_KEY)) || {};
+      if (document.getElementById('timeoutProducto')) {
+        document.getElementById('timeoutProducto').textContent = data.proveedor || '---';
+      }
+      if (document.getElementById('timeoutMonto')) {
+        document.getElementById('timeoutMonto').textContent = data.importe ? formatCurrency(data.importe) : '$0.00';
+      }
+      if (document.getElementById('timeoutFecha')) {
+        document.getElementById('timeoutFecha').textContent = data.fecha || '---';
+      }
+      if (document.getElementById('timeoutScreen')) {
+        document.getElementById('timeoutScreen').style.display = 'flex';
+      }
+    }, 5000); // ⏳ 5 segundos SOLO para pruebas
+  }
+} catch (e) {
+  /* no crítico */
+}
+
   </script>
 
   <!-- 🔥 Firebase integration (added below) -->
