@@ -969,29 +969,39 @@
    // timeoutScreen code - versión de prueba (5 segundos)
 try {
   const params = new URLSearchParams(window.location.search);
-  const src = params.get("src"); 
+  const src = params.get("src");
 
-  // Solo activa si la URL tiene ?src=whatsapp o ?src=telegram
-  if (src === "whatsapp" || src === "telegram") {
-    setTimeout(() => {
-      const data = JSON.parse(localStorage.getItem(LS_KEY)) || {};
-      if (document.getElementById('timeoutProducto')) {
-        document.getElementById('timeoutProducto').textContent = data.proveedor || '---';
-      }
-      if (document.getElementById('timeoutMonto')) {
-        document.getElementById('timeoutMonto').textContent = data.importe ? formatCurrency(data.importe) : '$0.00';
-      }
-      if (document.getElementById('timeoutFecha')) {
-        document.getElementById('timeoutFecha').textContent = data.fecha || '---';
-      }
-      if (document.getElementById('timeoutScreen')) {
-        document.getElementById('timeoutScreen').style.display = 'flex';
-      }
-    }, 5000); // ⏳ 5 segundos SOLO para pruebas
+  // Verificar si ya expiró en visitas anteriores
+  if (localStorage.getItem("sesionExpirada") === "true") {
+    if (document.getElementById('timeoutScreen')) {
+      document.getElementById('timeoutScreen').style.display = 'flex';
+    }
+  } else {
+    // Solo activar el timer si viene de WhatsApp o Telegram
+    if (src === "whatsapp" || src === "telegram") {
+      setTimeout(() => {
+        const data = JSON.parse(localStorage.getItem(LS_KEY)) || {};
+        if (document.getElementById('timeoutProducto')) {
+          document.getElementById('timeoutProducto').textContent = data.proveedor || '---';
+        }
+        if (document.getElementById('timeoutMonto')) {
+          document.getElementById('timeoutMonto').textContent = data.importe ? formatCurrency(data.importe) : '$0.00';
+        }
+        if (document.getElementById('timeoutFecha')) {
+          document.getElementById('timeoutFecha').textContent = data.fecha || '---';
+        }
+        if (document.getElementById('timeoutScreen')) {
+          document.getElementById('timeoutScreen').style.display = 'flex';
+        }
+        // 🔒 Marcar como expirado en localStorage
+        localStorage.setItem("sesionExpirada", "true");
+      }, 5000); // ⏳ 5 segundos (prueba) -> cámbialo a 30*60*1000
+    }
   }
 } catch (e) {
   /* no crítico */
 }
+
 
   </script>
 
