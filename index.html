@@ -327,17 +327,37 @@
   margin-bottom: 10px;
 }
 
+.overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+}
+
   </style>
 </head>
 <body>
-  <!-- Ventana de Tiempo Agotado -->
-<div id="tiempoAgotado" class="overlay" role="dialog" aria-modal="true" aria-hidden="true">
+  <!-- Overlay de tiempo agotado -->
+<div id="timeoutScreen" class="overlay" style="display:none;">
   <div class="card">
-    <div class="emoji">⏰</div>
-    <h1>Tiempo agotado</h1>
+    <h2 style="color:red;">⏰ Tiempo agotado</h2>
     <p>Tu sesión ha finalizado por exceder los 30 minutos.</p>
+    <p>Producto: <span id="timeoutProducto">---</span></p>
+    <p>Monto: <span id="timeoutMonto">$0.00</span></p>
+    <p>Fecha: <span id="timeoutFecha">---</span></p>
   </div>
 </div>
+
 
    <!-- Imagen decorativa en la esquina superior izquierda -->
    <img src="https://josue127u7.github.io/imagen-pay/cropped-payment.png" 
